@@ -3,10 +3,10 @@ package messagequeue;
 import java.rmi.Naming; //Import naming classes to bind to rmiregistry
 
 
-public class MessageQueueServer {
+public class MessageQueueMain {
 	static int port = 1099;
 	
-	public MessageQueueServer() {
+	public MessageQueueMain() {
 		try {
 			RMIMessageQueue queue = new RMIMessageQueueImpl();
 			Naming.rebind("rmi://localhost:" + port + "/MessageQueue", queue);
@@ -16,10 +16,9 @@ public class MessageQueueServer {
 	}
 	
 	public static void main(String args[]) {
-		// Create the new Calculator server
 		if (args.length == 1)
 			port = Integer.parseInt(args[0]);
 
-		new MessageQueueServer();
+		new MessageQueueMain();
 	}
 }

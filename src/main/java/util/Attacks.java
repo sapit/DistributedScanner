@@ -15,6 +15,12 @@ public class Attacks {
             this.url = url;
             this.paramsBatch = paramsBatch;
         }
+
+        @Override
+        public String toString(){
+            return "url: " + url
+                    + "Num of params: " + paramsBatch.size();
+        }
     }
 
     public static class BruteforceAttack extends BasicWebAttack implements Serializable{
@@ -23,6 +29,12 @@ public class Attacks {
             super(url, paramsBatch);
             this.successIdentifier = successIdentifier;
         }
+        @Override
+        public String toString(){
+            return super.toString()
+                    + "Success identifier: " + successIdentifier;
+        }
+
     }
 
     // EXAMPLE

@@ -26,7 +26,6 @@ public class WorkerMain {
 			Worker w = new WorkerImpl(names[i]);
 			RMIMessageQueue queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
 			while(true){
-//				w.handleTask(queue.getTaskString());
 				w.handleTask(queue.getTask());
 			}
 		}
