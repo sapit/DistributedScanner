@@ -3,8 +3,6 @@ package server;
 import messagequeue.RMIMessageQueue;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import util.Attack;
-import util.AttackType;
 import util.Attacks;
 
 import java.rmi.Naming;
@@ -13,7 +11,7 @@ import java.util.List;
 
 public class Producer {
 
-    public static Attacks.BasicWebAttack prepareAttack (){
+    public static Attacks.BasicWebAttack prepareAttackObject(){
         List<NameValuePair> params = new ArrayList<NameValuePair>(2);
         params.add(new BasicNameValuePair("param-1", "12345"));
         params.add(new BasicNameValuePair("field", "fuzzed"));
@@ -56,16 +54,10 @@ public class Producer {
 		try {
 			RMIMessageQueue queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
 			while(true) {
+
 				System.out.println("Sending task " + count);
-//				queue.createTask("Hui "+ count);
 				count++;
-
-                queue.createTask(prepareAttack());
-
-//                if(attackRes != null)
-//                    System.out.println(attackRes.toString());
-//                else
-//                    System.out.println("Something went wrong :(");
+                queue.createTask(prepareAttackObject());
 				Thread.sleep(100);
 			}
 		}
