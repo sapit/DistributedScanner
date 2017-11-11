@@ -1,0 +1,10 @@
+1. navigate to directory
+
+2. javac *.java
+
+3. start rmiregistry
+
+4. java Server
+
+5. in separate terminal: java Client
+
