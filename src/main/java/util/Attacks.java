@@ -40,9 +40,19 @@ public class Attacks {
     // EXAMPLE
     public static class SQLAttack extends  BasicWebAttack{
         List<NameValuePair> credentials;    // this could be used to compare a successful log in and a successful sql injection
-        public SQLAttack(String url, List<List<NameValuePair>> paramsBatch, List<NameValuePair> credentials){
+        public SQLAttack(String url, List<List<NameValuePair>> paramsBatch){
             super(url, paramsBatch);
-            this.credentials = credentials;
+            
         }
     }
+    
+        public static class XSSAttack extends  BasicWebAttack{
+ 
+        public XSSAttack(String url, List<List<NameValuePair>> paramsBatch){
+            super(url, paramsBatch);
+
+        }
+        
+    }
 }
+
