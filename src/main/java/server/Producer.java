@@ -56,8 +56,7 @@ public class Producer {
     	return paramsBatch;
     }
 
-    public static Attacks.BasicWebAttack prepareSQLAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams){
-//    	url = "http://localhost/webpage.php";
+    public static Attacks.SQLAttack createSQLAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams){
     	
     	List<NameValuePair> base_case = new ArrayList<NameValuePair>();
     	List<NameValuePair> paramsSQL = new ArrayList<NameValuePair>();
@@ -80,9 +79,7 @@ public class Producer {
     	return sqlAttack;
     }
     
-    public static Attacks.BasicWebAttack prepareXSSAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams){
-//    	url = "http://localhost/webpage.php";
-
+    public static Attacks.XSSAttack createXSSAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams){
     	List<List<NameValuePair>> paramsBatchXSS = new ArrayList<>();
     	
     	// implement the attacks for all the known vulnerable expressions
@@ -94,6 +91,25 @@ public class Producer {
         
     	Attacks.XSSAttack xssAttack = new Attacks.XSSAttack(url, paramsBatchXSS);
     	return xssAttack;
+    }
+
+    public static Attacks.SQLAttack localVulnAppSQL(){
+        List<String> paramNames = new ArrayList<>();
+        paramNames.add("username");
+        paramNames.add("password");
+        return createSQLAttackObject("http://localhost:8000", paramNames, "SubmitButton3", null);
+    }
+
+    public static Attacks.XSSAttack localVulnAppXSS(){
+        List<String> paramNames = new ArrayList<>();
+        paramNames.add("inputText1");
+        return createXSSAttackObject("http://localhost:8000", paramNames, "SubmitButton1", null);
+    }
+
+    public static Attacks.XSSAttack localVulnAppXSS2(){
+        List<String> paramNames = new ArrayList<>();
+        paramNames.add("inputText2");
+        return createXSSAttackObject("http://localhost:8000", paramNames, "SubmitButton2", null);
     }
     
 	public static void main(String[] args) {
@@ -112,7 +128,11 @@ public class Producer {
 			while(true) {
 				System.out.println("Sending task " + count);
 				count++;
-                queue.createTask(prepareAttackObject());
+//                queue.createTask(prepareAttackObject());
+                queue.createTask(localVulnAppSQL());
+                queue.createTask(localVulnAppXSS());
+                queue.createTask(localVulnAppXSS2());
+
 				Thread.sleep(100);
 			}
 		}

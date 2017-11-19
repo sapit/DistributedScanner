@@ -142,11 +142,8 @@ public class UrlAttacker {
             for (List<NameValuePair> paramsSet : attack.paramsBatch) {
                 HttpPost httppost = constructRequest(attack.url, paramsSet);
                 String response = getResponse(httpclient, httppost);
-                System.out.println(paramsSet);
-//                System.out.println(response);
                 if(response != null && response_base_case != null && response.compareTo(response_base_case)!=0){
                     System.out.println("Success on: SQL injection");
-                    System.out.println(response);
                     successfulParamSets.add(paramsSet);
                 }
             }
@@ -168,7 +165,7 @@ public class UrlAttacker {
                 HttpPost httppost = constructRequest(attack.url, paramsSet);
                 String response = getResponse(httpclient, httppost);
                 if(response != null){
-                	for(int i=0; i<paramsSet.size()-2;i++) {
+                	for(int i=0; i<paramsSet.size();i++) {
 //                	for(NameValuePair p : paramsSet) {
                 		NameValuePair p = paramsSet.get(i);
                 		if(response.contains(p.getValue())){

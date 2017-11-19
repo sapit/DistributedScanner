@@ -23,6 +23,7 @@ public class RMIMessageQueueImpl extends java.rmi.server.UnicastRemoteObject imp
 	@Override
 	public void createTask(Attacks.BasicWebAttack attack) throws RemoteException {
         System.out.println("Received task: ");
+		System.out.println(attack);
         queue.add(attack);
 	}
 
@@ -37,10 +38,11 @@ public class RMIMessageQueueImpl extends java.rmi.server.UnicastRemoteObject imp
     }
 
 	@Override
-	public void updateSuccessfulAttack(BasicWebAttack attack) {
+	public void updateSuccessfulAttack(BasicWebAttack attack) throws RemoteException{
 		successfulAttacks.add(attack);
-		System.out.print("Successful attack");
-		System.out.print(attack);
+		System.out.println("Successful attack");
+		System.out.println(attack);
+        System.out.println(attack.paramsBatch);
 	}
 
 }
