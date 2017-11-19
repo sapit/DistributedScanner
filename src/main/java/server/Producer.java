@@ -4,6 +4,7 @@ import messagequeue.RMIMessageQueue;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import util.Attacks;
+import util.UrlAttacker;
 
 import java.rmi.Naming;
 import java.util.ArrayList;
@@ -39,7 +40,62 @@ public class Producer {
         Attacks.BruteforceAttack bfAttack = new Attacks.BruteforceAttack("http://localhost:5000/login",paramsBatch, "Internal Server Error");
         return bfAttack;
     }
+    
+    public static List<List<NameValuePair>> getPairsFromExpressions(List<String> paramNames, String button, String[] knownExpressions) {
+    	List<NameValuePair> params = new ArrayList<NameValuePair>();
+    	List<List<NameValuePair>> paramsBatch = new ArrayList<>();
+    	for(String s : knownExpressions) {
+    		for(int i=0; i<paramNames.size(); i++) {
+    			params.add(new BasicNameValuePair(paramNames.get(i), s));
+    		}
+    		params.add(new BasicNameValuePair(button, ""));
+    		paramsBatch.add(params);
+    		params = new ArrayList<NameValuePair>();
+    	}
+    	
+    	return paramsBatch;
+    }
 
+    public static Attacks.BasicWebAttack prepareSQLAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams){
+//    	url = "http://localhost/webpage.php";
+    	
+    	List<NameValuePair> base_case = new ArrayList<NameValuePair>();
+    	List<NameValuePair> paramsSQL = new ArrayList<NameValuePair>();
+    	List<List<NameValuePair>> paramsBatchSQL = new ArrayList<>();
+    	
+    	//prepare the base case
+    	for(int i=0; i<paramNames.size(); i++) {
+    		base_case.add(new BasicNameValuePair(paramNames.get(i), ""));
+    	}
+    	base_case.add(new BasicNameValuePair(button, ""));
+    	
+    	// implement the attacks for all the known vulnerable expressions
+    	paramsBatchSQL = getPairsFromExpressions(paramNames, button, Attacks.SQLAttack.knownExpressions);
+    	
+    	//add the user defined attackParams
+    	if(attackParams != null)
+    		paramsBatchSQL.addAll(attackParams);
+        
+        Attacks.SQLAttack sqlAttack = new Attacks.SQLAttack(url,paramsBatchSQL, base_case); 
+    	return sqlAttack;
+    }
+    
+    public static Attacks.BasicWebAttack prepareXSSAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams){
+//    	url = "http://localhost/webpage.php";
+
+    	List<List<NameValuePair>> paramsBatchXSS = new ArrayList<>();
+    	
+    	// implement the attacks for all the known vulnerable expressions
+    	paramsBatchXSS = getPairsFromExpressions(paramNames, button, Attacks.XSSAttack.knownExpressions);
+    	
+    	//add the user defined attackParams
+    	if(attackParams != null)
+    		paramsBatchXSS.addAll(attackParams);
+        
+    	Attacks.XSSAttack xssAttack = new Attacks.XSSAttack(url, paramsBatchXSS);
+    	return xssAttack;
+    }
+    
 	public static void main(String[] args) {
 		String reg_host = "localhost";
 		int reg_port = 1099;
@@ -54,7 +110,6 @@ public class Producer {
 		try {
 			RMIMessageQueue queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
 			while(true) {
-
 				System.out.println("Sending task " + count);
 				count++;
                 queue.createTask(prepareAttackObject());

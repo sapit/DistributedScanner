@@ -25,10 +25,13 @@ public class WorkerImpl extends java.rmi.server.UnicastRemoteObject implements W
 	}
 
     @Override
-    public void handleTask(Attacks.BasicWebAttack attack) throws RemoteException {
+    public List<List<NameValuePair>> handleTask(Attacks.BasicWebAttack attack) throws RemoteException {
         List<List<NameValuePair>> successes = UrlAttacker.performAttack(attack);
-        if(successes.size()>0)
+        if(successes.size()>0){
             System.out.println(successes);
+        }
+        return successes;
+        
     }
 
 }

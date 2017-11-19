@@ -1,14 +1,18 @@
 package application;
 
 import messagequeue.RMIMessageQueue;
+import util.Attacks;
 
 import java.rmi.Naming;
+import java.util.List;
 import java.util.Random;
+
+import org.apache.http.NameValuePair;
 
 
 public class WorkerMain {
 	public static void main(String[] args) {
-		String[] names = {"John", "Tim", "Smith", "Ron", "A", "B", "C", "D", "E", "F"};
+		String[] names = {"John", "Tim", "Smith", "Ron", "Joshua", "Kevin", "Chris", "Michael", "Andrew", "Boris"};
 		Random random = new Random();
 
 		int i = random.nextInt(names.length);
@@ -26,7 +30,11 @@ public class WorkerMain {
 			Worker w = new WorkerImpl(names[i]);
 			RMIMessageQueue queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
 			while(true){
-				w.handleTask(queue.getTask());
+				Attacks.BasicWebAttack attack = queue.getTask();
+				List<List<NameValuePair>> successes = w.handleTask(attack);
+				if(successes != null && successes.size() > 0) {
+					queue.updateSuccessfulAttack(attack.recreate(successes));
+				}
 			}
 		}
 		catch(Exception e) {

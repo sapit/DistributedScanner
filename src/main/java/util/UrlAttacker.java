@@ -93,11 +93,10 @@ public class UrlAttacker {
         if(attack instanceof Attacks.BruteforceAttack){
             return bruteforceAttack((Attacks.BruteforceAttack) attack);
         }
-        //Two more attacks added
-        if(attack instanceof Attacks.XSSAttack){
+        else if(attack instanceof Attacks.XSSAttack){
             return XSSAttack((Attacks.XSSAttack) attack);
         }
-         if(attack instanceof Attacks.SQLAttack){
+        else if(attack instanceof Attacks.SQLAttack){
             return SQLinjectionAttack((Attacks.SQLAttack) attack);
         }
         return null;
@@ -122,11 +121,12 @@ public class UrlAttacker {
         }
         return successfulParamSets;
     }
-        /*SQL With the following naive approach. I check the input against a control input which is blank.
-        That follows the rationale that if an empty String is given as username and password there should be
-        no table return (still not clever for all cases). Better aproach could be 1. To have a valid account
-        in the server to attack and check against that input or 2. Use a table of cases to find the error message
-        againt bad login and test against that message. The test is the classic SQL query.
+        /*
+         SQL With the following naive approach. I check the input against a control input which is blank.
+         That follows the rationale that if an empty String is given as username and password there should be
+         no table return (still not clever for all cases). Better aproach could be 1. To have a valid account
+         in the server to attack and check against that input or 2. Use a table of cases to find the error message
+         againt bad login and test against that message. The test is the classic SQL query.
         */
         private static List<List<NameValuePair>> SQLinjectionAttack(Attacks.SQLAttack attack){
             if(attack==null || attack.url == null) { return null; }
@@ -135,22 +135,18 @@ public class UrlAttacker {
 
             HttpClient httpclient = HttpClients.createDefault();
 
+            List<NameValuePair> base_case = attack.base_case;
+            HttpPost httppost_base_case = constructRequest(attack.url, base_case);
+            String response_base_case = getResponse(httpclient, httppost_base_case);
+            
             for (List<NameValuePair> paramsSet : attack.paramsBatch) {
-                
-                List<NameValuePair> control = new ArrayList<NameValuePair>(3);
-                control.add(new BasicNameValuePair("username", ""));
-                control.add(new BasicNameValuePair("password", ""));
-                control.add(new BasicNameValuePair("SubmitButton3", "")); 
-                
-                HttpPost httppost_control = constructRequest(attack.url, control);
-                String response_control = getResponse(httpclient, httppost_control);
-                
                 HttpPost httppost = constructRequest(attack.url, paramsSet);
                 String response = getResponse(httpclient, httppost);
-
-                if(response != null && response_control !=null && response.compareTo(response_control)!=0){
+                System.out.println(paramsSet);
+//                System.out.println(response);
+                if(response != null && response_base_case != null && response.compareTo(response_base_case)!=0){
                     System.out.println("Success on: SQL injection");
-                    //System.out.println(response);
+                    System.out.println(response);
                     successfulParamSets.add(paramsSet);
                 }
             }
@@ -171,10 +167,17 @@ public class UrlAttacker {
             for (List<NameValuePair> paramsSet : attack.paramsBatch) {
                 HttpPost httppost = constructRequest(attack.url, paramsSet);
                 String response = getResponse(httpclient, httppost);
-
-                if(response != null  && response.contains("<script> alert(123) </script>")){
-                    System.out.println("Success on: XSS attack");
-                    successfulParamSets.add(paramsSet);
+                if(response != null){
+                	for(int i=0; i<paramsSet.size()-2;i++) {
+//                	for(NameValuePair p : paramsSet) {
+                		NameValuePair p = paramsSet.get(i);
+                		if(response.contains(p.getValue())){
+                			System.out.println("Success on: XSS attack");
+                			successfulParamSets.add(paramsSet);
+                			break;
+                		}
+                	}
+                	
                 }
             }
             return successfulParamSets;
