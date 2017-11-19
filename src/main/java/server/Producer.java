@@ -59,7 +59,7 @@ public class Producer {
 	    		allLists.add(keyStrings); //for each key add all possible strings to a list matching the regex of that key
     		
     	}
-    	List<NameValuePair> toPass = new ArrayList<NameValuePair>(allLists.size());
+    	List<NameValuePair> toPass = new ArrayList<NameValuePair>();
     	List<List<NameValuePair>> listOfCombinations = new ArrayList<List<NameValuePair>>();
     	generatePermutations(allLists,  listOfCombinations, 0, toPass, parameterNames);
     	System.out.println(allLists.size());
