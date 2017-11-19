@@ -4,10 +4,12 @@ import messagequeue.RMIMessageQueue;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import util.Attacks;
+import util.StringGenerator;
 
 import java.rmi.Naming;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class Producer {
 
@@ -35,13 +37,50 @@ public class Producer {
         credentials.add(new BasicNameValuePair("password", "password"));
 
         paramsBatch.add(credentials);
-
+        paramsBatch = createCombinations(params);        
         Attacks.BruteforceAttack bfAttack = new Attacks.BruteforceAttack("http://localhost:5000/login",paramsBatch, "Internal Server Error");
         return bfAttack;
+   }
+    public static List<List<NameValuePair>> createCombinations(List<NameValuePair> parameters){ //receive list of key:regex
+    	
+    	List<List<String>> allLists = new ArrayList<List<String>>(); 
+    	int i = 0;
+   
+    	NameValuePair currentPair;
+ 
+    	List<String> parameterNames = new ArrayList<String>(); //list of all the keys
+    	for(i = 0;i<parameters.size();i++) {
+    			currentPair = parameters.get(i);
+	    		String key = currentPair.getName();
+	    		String regex = currentPair.getValue();
+	    		parameterNames.add(key);
+	    		StringGenerator keyGenerator = new StringGenerator(regex);
+	    		List<String> keyStrings = new ArrayList<String>(keyGenerator.createStrings());
+	    		allLists.add(keyStrings); //for each key add all possible strings to a list matching the regex of that key
+    		
+    	}
+    	List<NameValuePair> toPass = new ArrayList<NameValuePair>(allLists.size());
+    	List<List<NameValuePair>> listOfCombinations = new ArrayList<List<NameValuePair>>();
+    	generatePermutations(allLists,  listOfCombinations, 0, toPass, parameterNames);
+    	System.out.println(allLists.size());
+    	return listOfCombinations;
     }
+    //below is the recursive method that creates all possible permutations from N lists of strings
+    public static void generatePermutations(List<List<String>> lists, List<List<NameValuePair>> result, int depth, List<NameValuePair> current, List<String> parameterNames) {
+    	if(depth==lists.size()) {
+    		result.add(current);
+    		return;
+    	}
+    	for(int i = 0; i < lists.get(depth).size(); i++) {
+    		current.add(new BasicNameValuePair(parameterNames.get(depth),lists.get(depth).get(i)));
+    		generatePermutations(lists, result, depth + 1, current, parameterNames);
+    	}
+    }
+    
 
 	public static void main(String[] args) {
 		String reg_host = "localhost";
+		
 		int reg_port = 1099;
 
 		if (args.length == 1) {
