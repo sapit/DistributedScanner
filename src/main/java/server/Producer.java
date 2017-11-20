@@ -6,6 +6,7 @@ import messagequeue.RMIMessageQueue;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import util.Attacks;
+import util.UrlAttacker;
 
 import java.rmi.Naming;
 import java.util.ArrayList;
@@ -72,7 +73,78 @@ public class Producer {
         }
         return;
     }
+    
+    public static List<List<NameValuePair>> getPairsFromExpressions(List<String> paramNames, String button, String[] knownExpressions) {
+    	List<NameValuePair> params = new ArrayList<NameValuePair>();
+    	List<List<NameValuePair>> paramsBatch = new ArrayList<>();
+    	for(String s : knownExpressions) {
+    		for(int i=0; i<paramNames.size(); i++) {
+    			params.add(new BasicNameValuePair(paramNames.get(i), s));
+    		}
+    		params.add(new BasicNameValuePair(button, ""));
+    		paramsBatch.add(params);
+    		params = new ArrayList<NameValuePair>();
+    	}
+    	
+    	return paramsBatch;
+    }
 
+    public static Attacks.SQLAttack createSQLAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams){
+    	
+    	List<NameValuePair> base_case = new ArrayList<NameValuePair>();
+    	List<NameValuePair> paramsSQL = new ArrayList<NameValuePair>();
+    	List<List<NameValuePair>> paramsBatchSQL = new ArrayList<>();
+    	
+    	//prepare the base case
+    	for(int i=0; i<paramNames.size(); i++) {
+    		base_case.add(new BasicNameValuePair(paramNames.get(i), ""));
+    	}
+    	base_case.add(new BasicNameValuePair(button, ""));
+    	
+    	// implement the attacks for all the known vulnerable expressions
+    	paramsBatchSQL = getPairsFromExpressions(paramNames, button, Attacks.SQLAttack.knownExpressions);
+    	
+    	//add the user defined attackParams
+    	if(attackParams != null)
+    		paramsBatchSQL.addAll(attackParams);
+        
+        Attacks.SQLAttack sqlAttack = new Attacks.SQLAttack(url,paramsBatchSQL, base_case); 
+    	return sqlAttack;
+    }
+    
+    public static Attacks.XSSAttack createXSSAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams){
+    	List<List<NameValuePair>> paramsBatchXSS = new ArrayList<>();
+    	
+    	// implement the attacks for all the known vulnerable expressions
+    	paramsBatchXSS = getPairsFromExpressions(paramNames, button, Attacks.XSSAttack.knownExpressions);
+    	
+    	//add the user defined attackParams
+    	if(attackParams != null)
+    		paramsBatchXSS.addAll(attackParams);
+        
+    	Attacks.XSSAttack xssAttack = new Attacks.XSSAttack(url, paramsBatchXSS);
+    	return xssAttack;
+    }
+
+    public static Attacks.SQLAttack localVulnAppSQL(){
+        List<String> paramNames = new ArrayList<>();
+        paramNames.add("username");
+        paramNames.add("password");
+        return createSQLAttackObject("http://localhost:8000", paramNames, "SubmitButton3", null);
+    }
+
+    public static Attacks.XSSAttack localVulnAppXSS(){
+        List<String> paramNames = new ArrayList<>();
+        paramNames.add("inputText1");
+        return createXSSAttackObject("http://localhost:8000", paramNames, "SubmitButton1", null);
+    }
+
+    public static Attacks.XSSAttack localVulnAppXSS2(){
+        List<String> paramNames = new ArrayList<>();
+        paramNames.add("inputText2");
+        return createXSSAttackObject("http://localhost:8000", paramNames, "SubmitButton2", null);
+    }
+    
 	public static void main(String[] args) {
 		String reg_host = "localhost";
 		
@@ -88,10 +160,13 @@ public class Producer {
 		try {
 			RMIMessageQueue queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
 			while(true) {
-
 				System.out.println("Sending task " + count);
 				count++;
-                queue.createTask(prepareAttackObject());
+//                queue.createTask(prepareAttackObject());
+                queue.createTask(localVulnAppSQL());
+                queue.createTask(localVulnAppXSS());
+                queue.createTask(localVulnAppXSS2());
+
 				Thread.sleep(100);
 			}
 		}
