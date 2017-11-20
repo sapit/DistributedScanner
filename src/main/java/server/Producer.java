@@ -13,7 +13,7 @@ import java.util.List;
 
 
 public class Producer {
-    public static List<List<NameValuePair>> generateValuesFromRegexes(List<NameValuePair> parametersRegEx){ //receive list of key:regex
+    public static List<List<NameValuePair>> generatePermutationsFromRegexes(List<NameValuePair> parametersRegEx){ //receive list of key:regex
     	List<List<NameValuePair>> parameterPermutations = new ArrayList<>();
 
         for(int i=0 ; i < parametersRegEx.size(); i++){
@@ -97,7 +97,7 @@ public class Producer {
     }
 
     public static Attacks.BruteforceAttack createBruteforceAttackObject(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier){
-        List<List<NameValuePair>> paramsPossibleValues = generateValuesFromRegexes(paramsRegex);
+        List<List<NameValuePair>> paramsPossibleValues = generatePermutationsFromRegexes(paramsRegex);
         List<NameValuePair> buttonInList = new ArrayList<>();
 
         buttonInList.add(new BasicNameValuePair(button, ""));
