@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Attacks {
 
-    public static class BasicWebAttack implements Serializable{
+    public static abstract class BasicWebAttack implements Serializable{
         public final String url;
         public final List<List<NameValuePair>> paramsBatch;       //multiple sets of parameters to try while attacking(a batch)
 
@@ -15,6 +15,13 @@ public class Attacks {
             this.url = url;
             this.paramsBatch = paramsBatch;
         }
+        
+        public BasicWebAttack(BasicWebAttack attack, List<List<NameValuePair>> paramsBatch){
+            this.url = attack.url;
+            this.paramsBatch = paramsBatch;
+        }
+        
+        public abstract BasicWebAttack recreate(List<List<NameValuePair>> paramsBatch);
 
         @Override
         public String toString(){
@@ -22,6 +29,7 @@ public class Attacks {
                     + "Num of params: " + paramsBatch.size();
         }
     }
+    
 
     public static class BruteforceAttack extends BasicWebAttack implements Serializable{
         public final String successIdentifier;
@@ -29,6 +37,11 @@ public class Attacks {
             super(url, paramsBatch);
             this.successIdentifier = successIdentifier;
         }
+        
+        public BruteforceAttack recreate(List<List<NameValuePair>> paramsBatch){
+            return new BruteforceAttack(this.url, paramsBatch, this.successIdentifier);
+        }
+        
         @Override
         public String toString(){
             return super.toString()
@@ -36,13 +49,32 @@ public class Attacks {
         }
 
     }
-
-    // EXAMPLE
+    
     public static class SQLAttack extends  BasicWebAttack{
-        List<NameValuePair> credentials;    // this could be used to compare a successful log in and a successful sql injection
-        public SQLAttack(String url, List<List<NameValuePair>> paramsBatch, List<NameValuePair> credentials){
+        final List<NameValuePair> base_case;    // known unsuccessful login to compare with other unsuccessful log ins and show successful sql injection
+        public static final String[] knownExpressions = {"' or ''='"};
+        
+        public SQLAttack(String url, List<List<NameValuePair>> paramsBatch, List<NameValuePair> base_case){
             super(url, paramsBatch);
-            this.credentials = credentials;
+            this.base_case = base_case;
+        }
+        
+        public SQLAttack recreate(List<List<NameValuePair>> paramsBatch){
+            return new SQLAttack(this.url, paramsBatch, this.base_case);
         }
     }
+    
+    public static class XSSAttack extends  BasicWebAttack{
+    	public static final String[] knownExpressions = {"<script> alert(123) </script>"};
+    	
+        public XSSAttack(String url, List<List<NameValuePair>> paramsBatch){
+            super(url, paramsBatch);
+        }
+        
+        public XSSAttack recreate(List<List<NameValuePair>> paramsBatch){
+            return new XSSAttack(this.url, paramsBatch);
+        }
+        
+    }
 }
+
