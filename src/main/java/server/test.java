@@ -16,9 +16,9 @@ public class test {
         p.add(new BasicNameValuePair("password","[123]"));
         p.add(new BasicNameValuePair("age","[123]"));
 
-        List<List<NameValuePair>> parameterPerms = Producer.createCombinations(p);
+        List<List<NameValuePair>> parameterPerms = Producer.generateValuesFromRegexes(p);
         ArrayList<List<NameValuePair>> result = new ArrayList<>();
-        Producer.generatePermutations(parameterPerms, 0, result ,new ArrayList<>());
+        Producer.getCartesianProduct(parameterPerms, 0, result ,new ArrayList<>());
 
         System.out.println(result);
     }

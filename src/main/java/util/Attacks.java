@@ -16,17 +16,12 @@ public class Attacks {
             this.paramsBatch = paramsBatch;
         }
         
-        public BasicWebAttack(BasicWebAttack attack, List<List<NameValuePair>> paramsBatch){
-            this.url = attack.url;
-            this.paramsBatch = paramsBatch;
-        }
-        
         public abstract BasicWebAttack recreate(List<List<NameValuePair>> paramsBatch);
 
         @Override
         public String toString(){
-            return "url: " + url
-                    + "Num of params: " + paramsBatch.size();
+            return "url: " + url + "\n"
+                    + "Num of params: " + paramsBatch.size() + "\n";
         }
     }
     
@@ -45,7 +40,7 @@ public class Attacks {
         @Override
         public String toString(){
             return super.toString()
-                    + "Success identifier: " + successIdentifier;
+                    + "Success identifier: " + successIdentifier + "\n";
         }
 
     }
