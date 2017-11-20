@@ -1,10 +1,11 @@
 package server;
 
+import com.mifmif.common.regex.Generex;
+import com.mifmif.common.regex.util.Iterator;
 import messagequeue.RMIMessageQueue;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import util.Attacks;
-import util.StringGenerator;
 
 import java.rmi.Naming;
 import java.util.ArrayList;
@@ -41,42 +42,36 @@ public class Producer {
         Attacks.BruteforceAttack bfAttack = new Attacks.BruteforceAttack("http://localhost:5000/login",paramsBatch, "Internal Server Error");
         return bfAttack;
    }
-    public static List<List<NameValuePair>> createCombinations(List<NameValuePair> parameters){ //receive list of key:regex
-    	
-    	List<List<String>> allLists = new ArrayList<List<String>>(); 
-    	int i = 0;
-   
-    	NameValuePair currentPair;
- 
-    	List<String> parameterNames = new ArrayList<String>(); //list of all the keys
-    	for(i = 0;i<parameters.size();i++) {
-    			currentPair = parameters.get(i);
-	    		String key = currentPair.getName();
-	    		String regex = currentPair.getValue();
-	    		parameterNames.add(key);
-	    		StringGenerator keyGenerator = new StringGenerator(regex);
-	    		List<String> keyStrings = new ArrayList<String>(keyGenerator.createStrings());
-	    		allLists.add(keyStrings); //for each key add all possible strings to a list matching the regex of that key
-    		
-    	}
-    	List<NameValuePair> toPass = new ArrayList<NameValuePair>();
-    	List<List<NameValuePair>> listOfCombinations = new ArrayList<List<NameValuePair>>();
-    	generatePermutations(allLists,  listOfCombinations, 0, toPass, parameterNames);
-    	System.out.println(allLists.size());
-    	return listOfCombinations;
+    public static List<List<NameValuePair>> createCombinations(List<NameValuePair> parametersRegEx){ //receive list of key:regex
+    	List<List<NameValuePair>> parameterPermutations = new ArrayList<>();
+
+        for(int i=0 ; i < parametersRegEx.size(); i++){
+            List<NameValuePair> permutations = new ArrayList<>();
+            Generex generex = new Generex(parametersRegEx.get(i).getValue());
+            Iterator iter = generex.iterator();
+            while(iter.hasNext()){
+                permutations.add(new BasicNameValuePair(parametersRegEx.get(i).getName(), iter.next()));
+            }
+            parameterPermutations.add(permutations);
+        }
+        return parameterPermutations;
     }
+
     //below is the recursive method that creates all possible permutations from N lists of strings
-    public static void generatePermutations(List<List<String>> lists, List<List<NameValuePair>> result, int depth, List<NameValuePair> current, List<String> parameterNames) {
-    	if(depth==lists.size()) {
-    		result.add(current);
-    		return;
-    	}
-    	for(int i = 0; i < lists.get(depth).size(); i++) {
-    		current.add(new BasicNameValuePair(parameterNames.get(depth),lists.get(depth).get(i)));
-    		generatePermutations(lists, result, depth + 1, current, parameterNames);
-    	}
+    public static void generatePermutations(List<List<NameValuePair>> parameterPermutations, int depth, List<List<NameValuePair>> result, List<NameValuePair> current){
+        //finished processing permutations
+        if(depth == parameterPermutations.size()){
+            List<NameValuePair> l = new ArrayList<>(current);
+            result.add(l);
+            return;
+        }
+        for(int i=0; i<parameterPermutations.get(depth).size(); i++){
+            current.add(parameterPermutations.get(depth).get(i));
+            generatePermutations(parameterPermutations, depth+1, result, current);
+            current.remove(current.size()-1);
+        }
+        return;
     }
-    
 
 	public static void main(String[] args) {
 		String reg_host = "localhost";
