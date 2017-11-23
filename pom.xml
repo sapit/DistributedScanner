@@ -18,11 +18,13 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.3.6</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
   			<groupId>com.github.mifmif</groupId>
- 			 <artifactId>generex</artifactId>
- 			 <version>1.0.2</version>
+ 			<artifactId>generex</artifactId>
+ 			<version>1.0.2</version>
+ 			<scope>compile</scope>
 		</dependency>
     </dependencies>
 
