@@ -1,5 +1,6 @@
 package server;
 
+import client.ClientCallback;
 import com.mifmif.common.regex.Generex;
 import com.mifmif.common.regex.util.Iterator;
 import messagequeue.RMIMessageQueue;
@@ -14,9 +15,18 @@ import java.util.List;
 
 
 public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements Producer {
-    
+	RMIMessageQueue queue;
 	protected ProducerImpl() throws RemoteException {
 		super();
+		String reg_host = "localhost";
+		int reg_port = 1099;
+		int count=0;
+		try {
+			queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static List<List<NameValuePair>> generatePermutationsFromRegexes(List<NameValuePair> parametersRegEx){ //receive list of key:regex
@@ -117,21 +127,23 @@ public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements
     
 
 	@Override
-	public void BruteforceAttack(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier)
+	public void BruteforceAttack(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier, ClientCallback callback)
 			throws RemoteException {
 		Attacks.BasicWebAttack attack = createBruteforceAttackObject(url, paramsRegex, button, successIdentifier);
-		
+		queue.createTask(attack, callback);
 	}
 
 	@Override
-	public void XSSAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams)
+	public void XSSAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, ClientCallback callback)
 			throws RemoteException {
 		Attacks.BasicWebAttack attack = createXSSAttackObject(url, paramNames, button, attackParams);
+        queue.createTask(attack, callback);
 	}
 
 	@Override
-	public void SQLAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams)
+	public void SQLAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, ClientCallback callback)
 			throws RemoteException {
 		Attacks.BasicWebAttack attack = createSQLAttackObject(url, paramNames, button, attackParams);
+        queue.createTask(attack, callback);
 	}
 }

@@ -57,25 +57,8 @@ public class ProducerMain {
 		String reg_host = "localhost";
 		int reg_port = 1099;
 
-
-//		if (args.length == 1)
-//			port = Integer.parseInt(args[0]);
-
-		
-		int count=0;
 		try {
 			RMIMessageQueue queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
-//			while(true) {
-//				System.out.println("Sending task " + count);
-//				count++;
-//
-//                queue.createTask(localVulnAppBruteforce(), null);
-//                queue.createTask(localVulnAppSQL(), null);
-//                queue.createTask(localVulnAppXSS(), null);
-//                queue.createTask(localVulnAppXSS2(), null);
-//
-//				Thread.sleep(100);
-//			}
 		}
 		catch(Exception e) {
 			e.printStackTrace();

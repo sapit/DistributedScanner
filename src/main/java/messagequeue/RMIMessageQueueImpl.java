@@ -23,6 +23,7 @@ public class RMIMessageQueueImpl extends java.rmi.server.UnicastRemoteObject imp
 		super();
         queue = new LinkedBlockingQueue<>();
         successfulAttacks = new LinkedBlockingQueue<>();
+        url_subscribers = new ConcurrentHashMap<>();
 	}
 	
 	@Override
