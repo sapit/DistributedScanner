@@ -1,44 +1,47 @@
 package server;
 
+import com.mifmif.common.regex.Generex;
+import com.mifmif.common.regex.util.Iterator;
 import messagequeue.RMIMessageQueue;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import util.Attacks;
-import util.UrlAttacker;
 
 import java.rmi.Naming;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProducerImpl {
 
-    public static Attacks.BasicWebAttack prepareAttackObject(){
-        List<NameValuePair> params = new ArrayList<NameValuePair>(2);
-        params.add(new BasicNameValuePair("param-1", "12345"));
-        params.add(new BasicNameValuePair("field", "fuzzed"));
+public class ProducerImpl implements Producer {
+    public static List<List<NameValuePair>> generatePermutationsFromRegexes(List<NameValuePair> parametersRegEx){ //receive list of key:regex
+    	List<List<NameValuePair>> parameterPermutations = new ArrayList<>();
 
-        List<NameValuePair> params2 = new ArrayList<NameValuePair>(2);
-        params2.add(new BasicNameValuePair("username", "username"));
-        params2.add(new BasicNameValuePair("password", "passwor"));//missing 'd'
+        for(int i=0 ; i < parametersRegEx.size(); i++){
+            List<NameValuePair> permutations = new ArrayList<>();
+            Generex generex = new Generex(parametersRegEx.get(i).getValue());
+            Iterator iter = generex.iterator();
+            while(iter.hasNext()){
+                permutations.add(new BasicNameValuePair(parametersRegEx.get(i).getName(), iter.next()));
+            }
+            parameterPermutations.add(permutations);
+        }
+        return parameterPermutations;
+    }
 
-        List<NameValuePair> params3 = new ArrayList<NameValuePair>(3);
-        params3.add(new BasicNameValuePair("username", "username"));
-        params3.add(new BasicNameValuePair("password", "password"));
-        params3.add(new BasicNameValuePair("age", "22a")); //not only numbers
-
-        List<List<NameValuePair>> paramsBatch = new ArrayList<>();
-        paramsBatch.add(params);
-        paramsBatch.add(params2);
-        paramsBatch.add(params3);
-
-        List<NameValuePair> credentials = new ArrayList<>(2);
-        credentials.add(new BasicNameValuePair("username", "username"));
-        credentials.add(new BasicNameValuePair("password", "password"));
-
-        paramsBatch.add(credentials);
-
-        Attacks.BruteforceAttack bfAttack = new Attacks.BruteforceAttack("http://localhost:5000/login",paramsBatch, "Internal Server Error");
-        return bfAttack;
+    //below is the recursive method that creates all possible permutations from N lists of strings
+    public static void getCartesianProduct(List<List<NameValuePair>> parameterPermutations, int depth, List<List<NameValuePair>> result, List<NameValuePair> current){
+        //finished processing permutations
+        if(depth == parameterPermutations.size()){
+            List<NameValuePair> l = new ArrayList<>(current);
+            result.add(l);
+            return;
+        }
+        for(int i=0; i<parameterPermutations.get(depth).size(); i++){
+            current.add(parameterPermutations.get(depth).get(i));
+            getCartesianProduct(parameterPermutations, depth+1, result, current);
+            current.remove(current.size()-1);
+        }
+        return;
     }
     
     public static List<List<NameValuePair>> getPairsFromExpressions(List<String> paramNames, String button, String[] knownExpressions) {
@@ -78,7 +81,7 @@ public class ProducerImpl {
         Attacks.SQLAttack sqlAttack = new Attacks.SQLAttack(url,paramsBatchSQL, base_case); 
     	return sqlAttack;
     }
-
+    
     public static Attacks.XSSAttack createXSSAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams){
     	List<List<NameValuePair>> paramsBatchXSS = new ArrayList<>();
     	
@@ -91,6 +94,19 @@ public class ProducerImpl {
         
     	Attacks.XSSAttack xssAttack = new Attacks.XSSAttack(url, paramsBatchXSS);
     	return xssAttack;
+    }
+
+    public static Attacks.BruteforceAttack createBruteforceAttackObject(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier){
+        List<List<NameValuePair>> paramsPossibleValues = generatePermutationsFromRegexes(paramsRegex);
+        List<NameValuePair> buttonInList = new ArrayList<>();
+
+        buttonInList.add(new BasicNameValuePair(button, ""));
+        paramsPossibleValues.add(buttonInList);
+
+        List<List<NameValuePair>> result = new ArrayList<>();
+        getCartesianProduct(paramsPossibleValues, 0, result, new ArrayList<>());
+        Attacks.BruteforceAttack bruteforceAttack = new Attacks.BruteforceAttack(url, result, successIdentifier);
+        return bruteforceAttack;
     }
 
     public static Attacks.SQLAttack localVulnAppSQL(){
@@ -112,8 +128,19 @@ public class ProducerImpl {
         return createXSSAttackObject("http://localhost:8000", paramNames, "SubmitButton2", null);
     }
 
+    public static Attacks.BruteforceAttack localVulnAppBruteforce(){
+        String successIdentifier = "logged in";
+        String button = "SubmitButton3";
+        List<NameValuePair> paramsRegex = new ArrayList<>();
+        paramsRegex.add(new BasicNameValuePair("username","Matt|Joe|Chris"));
+        paramsRegex.add(new BasicNameValuePair("password","123|Joe|Chris"));
+
+        return createBruteforceAttackObject("http://localhost:8000",paramsRegex, button,successIdentifier);
+    }
+    
 	public static void main(String[] args) {
 		String reg_host = "localhost";
+		
 		int reg_port = 1099;
 
 		if (args.length == 1) {
@@ -128,7 +155,8 @@ public class ProducerImpl {
 			while(true) {
 				System.out.println("Sending task " + count);
 				count++;
-//                queue.createTask(prepareAttackObject());
+
+                queue.createTask(localVulnAppBruteforce(), null);
                 queue.createTask(localVulnAppSQL(), null);
                 queue.createTask(localVulnAppXSS(), null);
                 queue.createTask(localVulnAppXSS2(), null);

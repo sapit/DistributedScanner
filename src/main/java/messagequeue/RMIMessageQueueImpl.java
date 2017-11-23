@@ -3,8 +3,6 @@ package messagequeue;
 import application.Worker;
 import util.Attacks;
 import util.Attacks.BasicWebAttack;
-
-
 import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.LinkedList;
