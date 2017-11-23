@@ -4,7 +4,7 @@ import util.Attacks;
 
 import java.rmi.RemoteException;
 
-import Client.ClientCallback;
+import client.ClientCallback;
 
 public interface RMIMessageQueue extends java.rmi.Remote {
 

@@ -1,6 +1,7 @@
 package messagequeue;
 
 import application.Worker;
+import client.ClientCallback;
 import util.Attacks;
 import util.Attacks.BasicWebAttack;
 import java.rmi.RemoteException;
@@ -13,12 +14,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import Client.ClientCallback;
-
 public class RMIMessageQueueImpl extends java.rmi.server.UnicastRemoteObject implements RMIMessageQueue {
 	BlockingQueue<Attacks.BasicWebAttack> queue;
 	BlockingQueue<Attacks.BasicWebAttack> successfulAttacks;
-	ConcurrentHashMap<String, Set<Client.ClientCallback>> url_subscribers;
+	ConcurrentHashMap<String, Set<client.ClientCallback>> url_subscribers;
 	
 	public RMIMessageQueueImpl()  throws RemoteException {
 		super();
@@ -27,11 +26,11 @@ public class RMIMessageQueueImpl extends java.rmi.server.UnicastRemoteObject imp
 	}
 	
 	@Override
-	public void createTask(Attacks.BasicWebAttack attack, Client.ClientCallback clientCallback) throws RemoteException {
+	public void createTask(Attacks.BasicWebAttack attack, client.ClientCallback clientCallback) throws RemoteException {
 		if(clientCallback != null) {
-			Set<Client.ClientCallback> s;
+			Set<client.ClientCallback> s;
 			if((s = url_subscribers.get(attack.url))==null) {
-				s = Collections.newSetFromMap(new ConcurrentHashMap<Client.ClientCallback, Boolean>());
+				s = Collections.newSetFromMap(new ConcurrentHashMap<client.ClientCallback, Boolean>());
 				url_subscribers.put(attack.url, s);
 			}
 			s.add(clientCallback);
@@ -57,8 +56,8 @@ public class RMIMessageQueueImpl extends java.rmi.server.UnicastRemoteObject imp
 		System.out.println("Successful attack");
 		System.out.println(attack);
         System.out.println(attack.paramsBatch);
-        Set<Client.ClientCallback> clients = url_subscribers.get(attack.url);
-        for (Client.ClientCallback c : clients) {
+        Set<client.ClientCallback> clients = url_subscribers.get(attack.url);
+        for (client.ClientCallback c : clients) {
         	c.update(attack);
         }
 	}

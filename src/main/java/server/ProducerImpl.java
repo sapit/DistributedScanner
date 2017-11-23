@@ -8,12 +8,18 @@ import org.apache.http.message.BasicNameValuePair;
 import util.Attacks;
 
 import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class ProducerImpl implements Producer {
-    public static List<List<NameValuePair>> generatePermutationsFromRegexes(List<NameValuePair> parametersRegEx){ //receive list of key:regex
+public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements Producer {
+    
+	protected ProducerImpl() throws RemoteException {
+		super();
+	}
+
+	public static List<List<NameValuePair>> generatePermutationsFromRegexes(List<NameValuePair> parametersRegEx){ //receive list of key:regex
     	List<List<NameValuePair>> parameterPermutations = new ArrayList<>();
 
         for(int i=0 ; i < parametersRegEx.size(); i++){
@@ -108,64 +114,24 @@ public class ProducerImpl implements Producer {
         Attacks.BruteforceAttack bruteforceAttack = new Attacks.BruteforceAttack(url, result, successIdentifier);
         return bruteforceAttack;
     }
-
-    public static Attacks.SQLAttack localVulnAppSQL(){
-        List<String> paramNames = new ArrayList<>();
-        paramNames.add("username");
-        paramNames.add("password");
-        return createSQLAttackObject("http://localhost:8000", paramNames, "SubmitButton3", null);
-    }
-
-    public static Attacks.XSSAttack localVulnAppXSS(){
-        List<String> paramNames = new ArrayList<>();
-        paramNames.add("inputText1");
-        return createXSSAttackObject("http://localhost:8000", paramNames, "SubmitButton1", null);
-    }
-
-    public static Attacks.XSSAttack localVulnAppXSS2(){
-        List<String> paramNames = new ArrayList<>();
-        paramNames.add("inputText2");
-        return createXSSAttackObject("http://localhost:8000", paramNames, "SubmitButton2", null);
-    }
-
-    public static Attacks.BruteforceAttack localVulnAppBruteforce(){
-        String successIdentifier = "logged in";
-        String button = "SubmitButton3";
-        List<NameValuePair> paramsRegex = new ArrayList<>();
-        paramsRegex.add(new BasicNameValuePair("username","Matt|Joe|Chris"));
-        paramsRegex.add(new BasicNameValuePair("password","123|Joe|Chris"));
-
-        return createBruteforceAttackObject("http://localhost:8000",paramsRegex, button,successIdentifier);
-    }
     
-	public static void main(String[] args) {
-		String reg_host = "localhost";
+
+	@Override
+	public void BruteforceAttack(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier)
+			throws RemoteException {
+		Attacks.BasicWebAttack attack = createBruteforceAttackObject(url, paramsRegex, button, successIdentifier);
 		
-		int reg_port = 1099;
+	}
 
-		if (args.length == 1) {
-			reg_port = Integer.parseInt(args[0]);
-		} else if (args.length == 2) {
-			reg_host = args[0];
-			reg_port = Integer.parseInt(args[1]);
-		}
-		int count=0;
-		try {
-			RMIMessageQueue queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
-			while(true) {
-				System.out.println("Sending task " + count);
-				count++;
+	@Override
+	public void XSSAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams)
+			throws RemoteException {
+		Attacks.BasicWebAttack attack = createXSSAttackObject(url, paramNames, button, attackParams);
+	}
 
-                queue.createTask(localVulnAppBruteforce(), null);
-                queue.createTask(localVulnAppSQL(), null);
-                queue.createTask(localVulnAppXSS(), null);
-                queue.createTask(localVulnAppXSS2(), null);
-
-				Thread.sleep(100);
-			}
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
+	@Override
+	public void SQLAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams)
+			throws RemoteException {
+		Attacks.BasicWebAttack attack = createSQLAttackObject(url, paramNames, button, attackParams);
 	}
 }
