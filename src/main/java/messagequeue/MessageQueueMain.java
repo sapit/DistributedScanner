@@ -23,18 +23,14 @@ public class MessageQueueMain {
 		try {
 			RMIMessageQueue queue = new RMIMessageQueueImpl();
 			Naming.rebind("rmi://localhost:" + port + "/MessageQueue", queue);
-            System.out.println("HUUUI");
         } catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public static void main(String args[]) {
-		System.out.println("@HSDJ");
 		if (args.length == 1)
 			port = Integer.parseInt(args[0]);
-        Attacks.BasicWebAttack attack = new Attacks.BruteforceAttack("", new ArrayList<>(), "");
-        System.out.println(attack);
 		new MessageQueueMain();
 	}
 }

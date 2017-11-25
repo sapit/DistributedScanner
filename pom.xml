@@ -26,12 +26,6 @@
  			<version>1.0.2</version>
  			<scope>compile</scope>
 		</dependency>
-        <!-- https://mvnrepository.com/artifact/org.codehaus.mojo/exec-maven-plugin -->
-        <!--<dependency>-->
-            <!--<groupId>org.codehaus.mojo</groupId>-->
-            <!--<artifactId>exec-maven-plugin</artifactId>-->
-            <!--<version>1.6.0</version>-->
-        <!--</dependency>-->
 
     </dependencies>
 
@@ -65,17 +59,6 @@
                         </configuration>
                     </execution>
                 </executions>
-                <!--<configuration>-->
-                    <!--<executable>maven</executable>-->
-                    <!--&lt;!&ndash; optional &ndash;&gt;-->
-                    <!--&lt;!&ndash;<workingDirectory>/tmp</workingDirectory>&ndash;&gt;-->
-                    <!--<includePluginDependencies>true</includePluginDependencies>-->
-                    <!--<arguments>-->
-                        <!--<argument>-X</argument>-->
-                        <!--<argument>myproject:dist</argument>-->
-                    <!--</arguments>-->
-                    <!--&lt;!&ndash;<classpathScope>java</classpathScope>&ndash;&gt;-->
-                <!--</configuration>-->
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.httpcomponents</groupId>
@@ -94,13 +77,6 @@
                         <artifactId>DistributedScanner</artifactId>
                         <version>1.0-SNAPSHOT</version>
                     </dependency>
-                    <!-- https://mvnrepository.com/artifact/org.codehaus.mojo/exec-maven-plugin -->
-                    <!--<dependency>-->
-                    <!--<groupId>org.codehaus.mojo</groupId>-->
-                    <!--<artifactId>exec-maven-plugin</artifactId>-->
-                    <!--<version>1.6.0</version>-->
-                    <!--</dependency>-->
-
                 </dependencies>
             </plugin>
         </plugins>
