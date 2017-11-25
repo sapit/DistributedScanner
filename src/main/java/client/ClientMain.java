@@ -1,8 +1,6 @@
 package client;
 
-import java.net.MalformedURLException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,16 +8,15 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
-import messagequeue.RMIMessageQueue;
 import server.Producer;
 
 public class ClientMain {
-	static int port = 1099;
-	static String reg_host = "localhost";
-	static Producer producer = null;
-	static ClientCallback callback = null;
+	private static int port = 1099;
+	private static String reg_host = "localhost";
+	private static Producer producer = null;
+	private static ClientCallback callback = null;
 
-	static void knownAttack(){
+	static void knownBruteforceAttack(){
 		String url = "https://gentle-depths-34500.herokuapp.com/";
 
 		String successIdentifier = "John";
@@ -27,9 +24,9 @@ public class ClientMain {
 		List<NameValuePair> paramsRegex = new ArrayList<>();
 		paramsRegex.add(new BasicNameValuePair("username","Matt|Joe|John"));
 		paramsRegex.add(new BasicNameValuePair("password","123|Joe|qwerty"));
-
+		System.out.println(paramsRegex);
 		try {
-			producer.BruteforceAttack(url, paramsRegex, button, successIdentifier, callback);
+			producer.BruteforceAttack(url, paramsRegex, button, successIdentifier, callback, 10);
 
 		} catch (RemoteException e) {
 			e.printStackTrace();
@@ -50,6 +47,6 @@ public class ClientMain {
 			e.printStackTrace();
 		}
 
-		knownAttack();
+		knownBruteforceAttack();
 	}
 }

@@ -12,8 +12,9 @@ public class ClientCallbackImpl extends java.rmi.server.UnicastRemoteObject impl
 
 	@Override
 	public void update(BasicWebAttack attacks) throws RemoteException {
+	    long rtt = System.currentTimeMillis() - attacks.timestamp;
 		System.out.println(attacks);
-		
+		System.out.println("Round trip time: " + rtt);
 	}
 
 }

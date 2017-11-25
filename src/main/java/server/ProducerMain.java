@@ -24,34 +24,33 @@ public class ProducerMain {
 		}
 	}
 	
-	public static Attacks.SQLAttack localVulnAppSQL(){
-        List<String> paramNames = new ArrayList<>();
-        paramNames.add("username");
-        paramNames.add("password");
-        return ProducerImpl.createSQLAttackObject("http://localhost:8000", paramNames, "SubmitButton3", null);
-    }
-
-    public static Attacks.XSSAttack localVulnAppXSS(){
-        List<String> paramNames = new ArrayList<>();
-        paramNames.add("inputText1");
-        return ProducerImpl.createXSSAttackObject("http://localhost:8000", paramNames, "SubmitButton1", null);
-    }
-
-    public static Attacks.XSSAttack localVulnAppXSS2(){
-        List<String> paramNames = new ArrayList<>();
-        paramNames.add("inputText2");
-        return ProducerImpl.createXSSAttackObject("http://localhost:8000", paramNames, "SubmitButton2", null);
-    }
-
-    public static Attacks.BruteforceAttack localVulnAppBruteforce(){
-        String successIdentifier = "logged in";
-        String button = "SubmitButton3";
-        List<NameValuePair> paramsRegex = new ArrayList<>();
-        paramsRegex.add(new BasicNameValuePair("username","Matt|Joe|Chris"));
-        paramsRegex.add(new BasicNameValuePair("password","123|Joe|Chris"));
-
-        return ProducerImpl.createBruteforceAttackObject("http://localhost:8000",paramsRegex, button,successIdentifier);
-    }
+//	public static Attacks.SQLAttack localVulnAppSQL(){
+//        List<String> paramNames = new ArrayList<>();
+//        paramNames.add("username");
+//        paramNames.add("password");
+//        return ProducerImpl.createSQLAttackObject("http://localhost:8000", paramNames, "SubmitButton3", null);
+//    }
+//
+//    public static Attacks.XSSAttack localVulnAppXSS(){
+//        List<String> paramNames = new ArrayList<>();
+//        paramNames.add("inputText1");
+//        return ProducerImpl.createXSSAttackObject("http://localhost:8000", paramNames, "SubmitButton1", null);
+//    }
+//
+//    public static Attacks.XSSAttack localVulnAppXSS2(){
+//        List<String> paramNames = new ArrayList<>();
+//        paramNames.add("inputText2");
+//        return ProducerImpl.createXSSAttackObject("http://localhost:8000", paramNames, "SubmitButton2", null);
+//    }
+//
+//    public static Attacks.BruteforceAttack localVulnAppBruteforce(){
+//        String successIdentifier = "logged in";
+//        String button = "SubmitButton3";
+//        List<NameValuePair> paramsRegex = new ArrayList<>();
+//        paramsRegex.add(new BasicNameValuePair("username","Matt|Joe|Chris"));
+//        paramsRegex.add(new BasicNameValuePair("password","123|Joe|Chris"));
+//        return ProducerImpl.createBruteforceAttackObject("http://localhost:8000",paramsRegex, button,successIdentifier);
+//    }
 
 	public static void main(String[] args) {
 		String reg_host = "localhost";

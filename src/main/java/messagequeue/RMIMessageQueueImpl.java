@@ -15,9 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class RMIMessageQueueImpl extends java.rmi.server.UnicastRemoteObject implements RMIMessageQueue {
-	BlockingQueue<Attacks.BasicWebAttack> queue;
-	BlockingQueue<Attacks.BasicWebAttack> successfulAttacks;
-	ConcurrentHashMap<String, Set<client.ClientCallback>> url_subscribers;
+	private BlockingQueue<Attacks.BasicWebAttack> queue;
+	private BlockingQueue<Attacks.BasicWebAttack> successfulAttacks;
+	private ConcurrentHashMap<String, Set<client.ClientCallback>> url_subscribers;
 	
 	public RMIMessageQueueImpl()  throws RemoteException {
 		super();
