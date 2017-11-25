@@ -11,13 +11,15 @@ import org.apache.http.NameValuePair;
 
 
 public class WorkerMain {
+	static String reg_host = "localhost";
+//	static String reg_host = "130.209.246.233";
+	
 	public static void main(String[] args) {
 		String[] names = {"John", "Tim", "Smith", "Ron", "Joshua", "Kevin", "Chris", "Michael", "Andrew", "Boris"};
 		Random random = new Random();
 
 		int i = random.nextInt(names.length);
-
-		String reg_host = "localhost";
+		
 		int reg_port = 1099;
 
 		if (args.length == 1) {
@@ -33,7 +35,7 @@ public class WorkerMain {
 				Attacks.BasicWebAttack attack = queue.getTask();
 				List<List<NameValuePair>> successes = w.handleTask(attack);
 				if(successes != null && successes.size() > 0) {
-					queue.updateSuccessfulAttack(attack.recreate(successes));
+						queue.updateSuccessfulAttack(attack.recreate(successes));
 				}
 			}
 		}

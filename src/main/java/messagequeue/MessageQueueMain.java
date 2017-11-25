@@ -26,6 +26,7 @@ public class MessageQueueMain {
         } catch (Exception e) {
 			e.printStackTrace();
 		}
+	    System.out.println("Started message queue: ");
 	}
 	
 	public static void main(String args[]) {

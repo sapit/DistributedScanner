@@ -12,13 +12,23 @@ import messagequeue.RMIMessageQueueImpl;
 import util.Attacks;
 
 public class ProducerMain {
-	static int port = 1099;
+	static int reg_port = 1099;
+	static String reg_host = "localhost";
+//	static String reg_host = "130.209.246.233";
 	private static RMIMessageQueue queue;
 	
 	public ProducerMain() {
 		try {
-			Producer producer = new ProducerImpl();
-			Naming.rebind("rmi://localhost:" + port + "/Producer", producer);
+            java.rmi.registry.LocateRegistry.createRegistry(reg_port);
+            System.out.println("RMI registry ready.");
+        } catch (Exception e) {
+            System.out.println("Exception starting RMI registry:");
+            e.printStackTrace();
+        }
+		
+		try {
+			Producer producer = new ProducerImpl(queue);
+			Naming.rebind("rmi://localhost:" + reg_port + "/Producer", producer);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -53,11 +63,9 @@ public class ProducerMain {
 //    }
 
 	public static void main(String[] args) {
-		String reg_host = "localhost";
-		int reg_port = 1099;
 
 		try {
-			RMIMessageQueue queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
+			queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
 		}
 		catch(Exception e) {
 			e.printStackTrace();

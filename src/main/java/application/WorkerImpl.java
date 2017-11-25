@@ -13,11 +13,15 @@ public class WorkerImpl extends java.rmi.server.UnicastRemoteObject implements W
 	protected WorkerImpl() throws RemoteException {
 		super();
 		this.name = "default";
+		
+		System.out.println("Started worker: ");
 	}
 	
 	protected WorkerImpl(String name) throws RemoteException {
 		super();
 		this.name = name;
+		
+		System.out.println("Started worker: ");
 	}
 
     @Override

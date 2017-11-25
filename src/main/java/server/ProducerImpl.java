@@ -16,16 +16,27 @@ import java.util.List;
 
 public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements Producer {
 	private RMIMessageQueue queue;
+	String reg_host = "localhost";
+//	String reg_host = "130.209.246.233";
+	int reg_port = 1099;
+	
 	protected ProducerImpl() throws RemoteException {
 		super();
-		String reg_host = "localhost";
-		int reg_port = 1099;
 		try {
 			queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 		}
+		
+		System.out.println("Started producer: ");
+	}
+	
+	protected ProducerImpl(RMIMessageQueue queue) throws RemoteException {
+		super();
+		this.queue = queue;
+		
+		System.out.println("Started producer: ");
 	}
 
 	private static List<List<NameValuePair>> generatePermutationsFromRegexes(List<NameValuePair> parametersRegEx){ //receive list of key:regex
@@ -146,6 +157,7 @@ public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements
 	public void BruteforceAttack(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier, ClientCallback callback, int batchSize)
 			throws RemoteException {
         List<Attacks.BruteforceAttack> attacks = createBruteforceAttackObject(url, paramsRegex, button, successIdentifier, batchSize);
+        System.out.println(attacks);
         for(Attacks.BruteforceAttack a : attacks){
             queue.createTask(a, callback);
         }
@@ -155,6 +167,7 @@ public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements
 	public void XSSAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, ClientCallback callback, int batchSize)
 			throws RemoteException {
         List<Attacks.XSSAttack> attacks = createXSSAttackObject(url, paramNames, button, attackParams, batchSize);
+        System.out.println(attacks);
         for(Attacks.XSSAttack a : attacks){
             queue.createTask(a, callback);
         }
@@ -164,6 +177,7 @@ public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements
 	public void SQLAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, ClientCallback callback, int batchSize)
 			throws RemoteException {
         List<Attacks.SQLAttack> attacks = createSQLAttackObject(url, paramNames, button, attackParams, batchSize);
+        System.out.println(attacks);
         for(Attacks.SQLAttack a : attacks){
             queue.createTask(a, callback);
         }
