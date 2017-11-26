@@ -10,10 +10,10 @@ import util.Attacks;
 
 public interface Producer extends java.rmi.Remote {
 
-	void BruteforceAttack(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier, ClientCallback callback, int batchSize) throws RemoteException;
+	void BruteforceAttack(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier, ClientCallback callback, Integer batchSize) throws RemoteException;
 	
-	void XSSAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, ClientCallback callback, int batchSize) throws RemoteException;
+	void XSSAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, ClientCallback callback, Integer batchSize) throws RemoteException;
 	
-	void SQLAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, ClientCallback callback, int batchSize) throws RemoteException;
+	void SQLAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, ClientCallback callback, Integer batchSize) throws RemoteException;
 
 }

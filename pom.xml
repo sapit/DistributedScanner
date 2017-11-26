@@ -27,57 +27,70 @@
  			<scope>compile</scope>
 		</dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.jolira/onejar-maven-plugin -->
+        <dependency>
+            <groupId>com.jolira</groupId>
+            <artifactId>onejar-maven-plugin</artifactId>
+            <version>1.4.4</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <groupId>com.jolira</groupId>
+                <artifactId>onejar-maven-plugin</artifactId>
+                <version>1.4.4</version>
                 <executions>
                     <execution>
-                        <id>first</id>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
+                        <id>messagequeue</id>
                         <configuration>
-                            <includePluginDependencies>true</includePluginDependencies>
-                            <includeProjectDependencies>true</includeProjectDependencies>
                             <mainClass>messagequeue.MessageQueueMain</mainClass>
+                            <attachToBuild>true</attachToBuild>
+                            <classifier>onejar</classifier>
+                            <filename>messagequeue.jar</filename>
                         </configuration>
+                        <goals>
+                            <goal>one-jar</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>worker</id>
+                        <configuration>
+                            <mainClass>application.WorkerMain</mainClass>
+                            <attachToBuild>true</attachToBuild>
+                            <classifier>onejar</classifier>
+                            <filename>worker.jar</filename>
+                        </configuration>
+                        <goals>
+                            <goal>one-jar</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>server</id>
+                        <configuration>
+                            <mainClass>server.ProducerMain</mainClass>
+                            <attachToBuild>true</attachToBuild>
+                            <classifier>onejar</classifier>
+                            <filename>server.jar</filename>
+                        </configuration>
+                        <goals>
+                            <goal>one-jar</goal>
+                        </goals>
                     </execution>
                     <execution>
                         <id>client</id>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
                         <configuration>
-                            <includePluginDependencies>true</includePluginDependencies>
-                            <includeProjectDependencies>true</includeProjectDependencies>
                             <mainClass>client.ClientMain</mainClass>
+                            <attachToBuild>true</attachToBuild>
+                            <classifier>onejar</classifier>
+                            <filename>client.jar</filename>
                         </configuration>
+                        <goals>
+                            <goal>one-jar</goal>
+                        </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.httpcomponents</groupId>
-                        <artifactId>httpclient</artifactId>
-                        <version>4.3.6</version>
-                        <scope>compile</scope>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.github.mifmif</groupId>
-                        <artifactId>generex</artifactId>
-                        <version>1.0.2</version>
-                        <scope>compile</scope>
-                    </dependency>
-                    <dependency>
-                        <groupId>mygroup</groupId>
-                        <artifactId>DistributedScanner</artifactId>
-                        <version>1.0-SNAPSHOT</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>

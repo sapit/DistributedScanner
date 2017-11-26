@@ -53,8 +53,7 @@ public class Attacks {
         public String toString(){
             return "Bruteforce attack {\n"
                     + super.toString()
-                    + "Success identifier: " + successIdentifier + "\n"
-                    + "}\n";
+                    + "Success identifier: " + successIdentifier + "\n";
         }
 
     }
@@ -80,8 +79,7 @@ public class Attacks {
         @Override
         public String toString(){
             return "SQL attack {\n"
-                    + super.toString()
-                    + "}\n";
+                    + super.toString();
         }
 
     }
@@ -104,8 +102,7 @@ public class Attacks {
         @Override
         public String toString(){
             return "XSS attack {\n"
-                    + super.toString()
-                    + "}\n";
+                    + super.toString();
         }
     }
 }

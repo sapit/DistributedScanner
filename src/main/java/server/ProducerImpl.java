@@ -16,12 +16,17 @@ import java.util.List;
 
 public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements Producer {
 	private RMIMessageQueue queue;
-	String reg_host = "localhost";
-//	String reg_host = "130.209.246.233";
-	int reg_port = 1099;
+	static String reg_host = "localhost";
+	static int reg_port = 1099;
+	private final static int DEFAULT_BATCH_SIZE = 10;
 	
 	protected ProducerImpl() throws RemoteException {
 		super();
+        String port = System.getProperty("port");
+        reg_port = port != null ? Integer.parseInt(port) : reg_port;
+        String host = System.getProperty("host");
+        reg_host = host != null ? host : reg_host;
+
 		try {
 			queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
 		}
@@ -84,7 +89,7 @@ public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements
     	return paramsBatch;
     }
 
-    private static List<Attacks.SQLAttack> createSQLAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, int batchSize){
+    private static List<Attacks.SQLAttack> createSQLAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> additionalAttackParams, int batchSize){
     	List<NameValuePair> base_case = new ArrayList<>();
     	List<List<NameValuePair>> paramsListSQL;
     	
@@ -99,34 +104,34 @@ public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements
     	// implement the attacks for all the known vulnerable expressions
     	paramsListSQL = getPairsFromExpressions(paramNames, button, Attacks.SQLAttack.knownExpressions);
     	
-    	//add the user defined attackParams
-    	if(attackParams != null)
-    		paramsListSQL.addAll(attackParams);
+    	//add the user defined additionalAttackParams
+    	if(additionalAttackParams != null)
+    		paramsListSQL.addAll(additionalAttackParams);
 
         List<Attacks.SQLAttack> attacks = new ArrayList<>();
         List<List<NameValuePair>> batch;
         for(int i=0; i < paramsListSQL.size(); i+=batchSize){
-            batch = paramsListSQL.subList(i, i+batchSize > paramsListSQL.size() ? paramsListSQL.size() : i+batchSize);
+            batch = new ArrayList<>(paramsListSQL.subList(i, i+batchSize > paramsListSQL.size() ? paramsListSQL.size() : i+batchSize));
             attacks.add(new Attacks.SQLAttack(url, batch, base_case));
         }
         return attacks;
     }
     
-    private static List<Attacks.XSSAttack> createXSSAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, int batchSize){
+    private static List<Attacks.XSSAttack> createXSSAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> additionalAttackParams, int batchSize){
         List<List<NameValuePair>> paramsListXSS;
     	
     	// implement the attacks for all the known vulnerable expressions
     	paramsListXSS = getPairsFromExpressions(paramNames, button, Attacks.XSSAttack.knownExpressions);
     	
-    	//add the user defined attackParams
-    	if(attackParams != null)
-    		paramsListXSS.addAll(attackParams);
+    	//add the user defined additionalAttackParams
+    	if(additionalAttackParams != null)
+    		paramsListXSS.addAll(additionalAttackParams);
 
         List<Attacks.XSSAttack> attacks = new ArrayList<>();
         List<List<NameValuePair>> batch;
 
         for(int i=0; i < paramsListXSS.size(); i+=batchSize){
-            batch = paramsListXSS.subList(i, i+batchSize > paramsListXSS.size() ? paramsListXSS.size() : i+batchSize);
+            batch = new ArrayList<>(paramsListXSS.subList(i, i+batchSize > paramsListXSS.size() ? paramsListXSS.size() : i+batchSize));
             attacks.add(new Attacks.XSSAttack(url, batch));
         }
         return attacks;
@@ -154,8 +159,9 @@ public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements
     
 
 	@Override
-	public void BruteforceAttack(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier, ClientCallback callback, int batchSize)
+	public void BruteforceAttack(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier, ClientCallback callback, Integer batchSize)
 			throws RemoteException {
+        batchSize = batchSize == null || batchSize <= 0 ? DEFAULT_BATCH_SIZE : batchSize;
         List<Attacks.BruteforceAttack> attacks = createBruteforceAttackObject(url, paramsRegex, button, successIdentifier, batchSize);
         System.out.println(attacks);
         for(Attacks.BruteforceAttack a : attacks){
@@ -164,9 +170,10 @@ public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements
 	}
 
 	@Override
-	public void XSSAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, ClientCallback callback, int batchSize)
+	public void XSSAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> additionalAttackParams, ClientCallback callback, Integer batchSize)
 			throws RemoteException {
-        List<Attacks.XSSAttack> attacks = createXSSAttackObject(url, paramNames, button, attackParams, batchSize);
+        batchSize = batchSize == null || batchSize <= 0 ? DEFAULT_BATCH_SIZE : batchSize;
+        List<Attacks.XSSAttack> attacks = createXSSAttackObject(url, paramNames, button, additionalAttackParams, batchSize);
         System.out.println(attacks);
         for(Attacks.XSSAttack a : attacks){
             queue.createTask(a, callback);
@@ -174,9 +181,10 @@ public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements
 	}
 
 	@Override
-	public void SQLAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, ClientCallback callback, int batchSize)
+	public void SQLAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> additionalAttackParams, ClientCallback callback, Integer batchSize)
 			throws RemoteException {
-        List<Attacks.SQLAttack> attacks = createSQLAttackObject(url, paramNames, button, attackParams, batchSize);
+        batchSize = batchSize == null || batchSize <= 0 ? DEFAULT_BATCH_SIZE : batchSize;
+        List<Attacks.SQLAttack> attacks = createSQLAttackObject(url, paramNames, button, additionalAttackParams, batchSize);
         System.out.println(attacks);
         for(Attacks.SQLAttack a : attacks){
             queue.createTask(a, callback);
