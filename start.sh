@@ -2,21 +2,17 @@
 
 display_help(){
     echo "Available commands are:
-        --w|--worker\n
-        --q|--queue\n
-        --c|--client\n
-        --s|--server\n
-        Additional parameters:\n
-        --p|--port\n
-        --h|--host\n"
+        --w|--worker
+        --q|--queue
+        --c|--client
+        --s|--server
+        Additional parameters:
+        --p|--port 0000
+        --h|--host X.X.X.X"
+    exit 0
 }
 
-if [ "$1" == "-h" ] || [ $# -eq 0 ]; then
-    display_help
-    exit 0
-fi
-
-while [[ $# -gt 0 ]] && [[ ."$1" = .--* ]] ;
+while [[ $# -gt 0 ]];
 do
     opt="$1";
     shift;              #expose next argument
@@ -35,7 +31,7 @@ do
         "--h"|"--host" )
             host="$1"; shift;&
         *)
-            echo >&2 "Invalid option: $@"; display_help; exit 1;;
+            echo >&2 "Invalid option: $opt"; display_help; exit 1;;
     esac
     echo 'hui'
 done
