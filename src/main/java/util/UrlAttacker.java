@@ -109,8 +109,7 @@ public class UrlAttacker {
             String response = getResponse(httpclient, httppost);
 
             if(response != null && response.contains(attack.successIdentifier)){
-                System.out.println("SUCCESS!!!!");
-                //System.out.println(response);
+                System.out.println("Success on brute force");
                 successfulParamSets.add(paramsSet);
             }
         }
@@ -161,9 +160,8 @@ public class UrlAttacker {
                 String response = getResponse(httpclient, httppost);
                 if(response != null){
                 	for(int i=0; i<paramsSet.size();i++) {
-//                	for(NameValuePair p : paramsSet) {
                 		NameValuePair p = paramsSet.get(i);
-                		if(response.contains(p.getValue())){
+                		if(p.getValue().compareTo("")!=0 && response.contains(p.getValue())){
                 			System.out.println("Success on: XSS attack");
                 			successfulParamSets.add(paramsSet);
                 			break;

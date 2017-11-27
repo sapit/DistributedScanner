@@ -18,7 +18,7 @@ public class ClientMain {
     private static String url = "https://gentle-depths-34500.herokuapp.com/";
 
 	static void knownBruteforceAttack(){
-		String successIdentifier = "John";
+		String successIdentifier = "logged in";
 		String button = "SubmitButton3";
 		List<NameValuePair> paramsRegex = new ArrayList<>();
 		paramsRegex.add(new BasicNameValuePair("username","Matt|Joe|John"));

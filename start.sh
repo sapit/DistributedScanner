@@ -2,13 +2,13 @@
 
 display_help(){
     echo "Available commands are:
-        --w|--worker
-        --q|--queue
-        --c|--client
-        --s|--server
+        -w|--worker
+        -q|--queue
+        -c|--client
+        -s|--server
         Additional parameters:
-        --p|--port 0000
-        --h|--host X.X.X.X"
+        -p|--port 0000
+        -h|--host X.X.X.X"
     exit 0
 }
 
@@ -17,23 +17,22 @@ do
     opt="$1";
     shift;              #expose next argument
     case "$opt" in
-        "--w"|"--worker" )
+        "-w"|"--worker" )
             target="target/worker.jar";;
-        "--q"|"--queue" )
+        "-q"|"--queue" )
             target="target/messagequeue.jar";;
-        "--c"|"--client" )
+        "-c"|"--client" )
             target="target/client.jar";;
-        "--s"|"--server" )
+        "-s"|"--server" )
             target="target/server.jar";;
 
-        "--p"|"--port" )
+        "-p"|"--port" )
             port="$1"; shift;;
-        "--h"|"--host" )
+        "-h"|"--host" )
             host="$1"; shift;&
         *)
             echo >&2 "Invalid option: $opt"; display_help; exit 1;;
     esac
-    echo 'hui'
 done
 
 command="java -jar"

@@ -26,7 +26,7 @@ public class WorkerMain {
 
 		int i = random.nextInt(names.length);
 		try {
-			Worker w = new WorkerImpl(names[i]);
+			Worker w = new Worker(names[i]);
 			queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
 			while(true){
 				Attacks.BasicWebAttack attack = queue.getTask();

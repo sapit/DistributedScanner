@@ -1,15 +1,10 @@
 package messagequeue;
 
-import application.Worker;
-import client.ClientCallback;
 import util.Attacks;
 import util.Attacks.BasicWebAttack;
 import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
