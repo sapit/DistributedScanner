@@ -7,9 +7,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import util.Attacks;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -70,9 +67,7 @@ public class UrlAttacker {
             try {
                 instream = entity.getContent();
                 Scanner s = new Scanner(instream).useDelimiter("\\A");
-                String result = s.hasNext() ? s.next() : "";
-
-                return result;
+                return s.hasNext() ? s.next() : "";
 
             } catch (IOException e) {
                 e.printStackTrace();

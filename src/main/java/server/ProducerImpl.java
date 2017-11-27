@@ -15,21 +15,36 @@ import java.util.List;
 
 
 public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements Producer {
-	RMIMessageQueue queue;
+	private RMIMessageQueue queue;
+	private static String reg_host = "localhost";
+	private static int reg_port = 1099;
+	private final static int DEFAULT_BATCH_SIZE = 10;
+	
 	protected ProducerImpl() throws RemoteException {
 		super();
-		String reg_host = "localhost";
-		int reg_port = 1099;
-		int count=0;
+        String port = System.getProperty("port");
+        reg_port = port != null ? Integer.parseInt(port) : reg_port;
+        String host = System.getProperty("host");
+        reg_host = host != null ? host : reg_host;
+
 		try {
 			queue = (RMIMessageQueue) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MessageQueue");
 		}
 		catch(Exception e) {
 			e.printStackTrace();
 		}
+		
+		System.out.println("Started producer: ");
+	}
+	
+	protected ProducerImpl(RMIMessageQueue queue) throws RemoteException {
+		super();
+		this.queue = queue;
+		
+		System.out.println("Started producer: ");
 	}
 
-	public static List<List<NameValuePair>> generatePermutationsFromRegexes(List<NameValuePair> parametersRegEx){ //receive list of key:regex
+	private static List<List<NameValuePair>> generatePermutationsFromRegexes(List<NameValuePair> parametersRegEx){ //receive list of key:regex
     	List<List<NameValuePair>> parameterPermutations = new ArrayList<>();
 
         for(int i=0 ; i < parametersRegEx.size(); i++){
@@ -45,7 +60,7 @@ public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements
     }
 
     //below is the recursive method that creates all possible permutations from N lists of strings
-    public static void getCartesianProduct(List<List<NameValuePair>> parameterPermutations, int depth, List<List<NameValuePair>> result, List<NameValuePair> current){
+    private static void getCartesianProduct(List<List<NameValuePair>> parameterPermutations, int depth, List<List<NameValuePair>> result, List<NameValuePair> current){
         //finished processing permutations
         if(depth == parameterPermutations.size()){
             List<NameValuePair> l = new ArrayList<>(current);
@@ -57,93 +72,122 @@ public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements
             getCartesianProduct(parameterPermutations, depth+1, result, current);
             current.remove(current.size()-1);
         }
-        return;
     }
     
-    public static List<List<NameValuePair>> getPairsFromExpressions(List<String> paramNames, String button, String[] knownExpressions) {
-    	List<NameValuePair> params = new ArrayList<NameValuePair>();
+    private static List<List<NameValuePair>> getPairsFromExpressions(List<String> paramNames, String button, String[] knownExpressions) {
+    	List<NameValuePair> params = new ArrayList<>();
     	List<List<NameValuePair>> paramsBatch = new ArrayList<>();
     	for(String s : knownExpressions) {
-    		for(int i=0; i<paramNames.size(); i++) {
-    			params.add(new BasicNameValuePair(paramNames.get(i), s));
-    		}
+    		for(String paramName : paramNames){
+                params.add(new BasicNameValuePair(paramName, s));
+            }
     		params.add(new BasicNameValuePair(button, ""));
     		paramsBatch.add(params);
-    		params = new ArrayList<NameValuePair>();
+    		params = new ArrayList<>();
     	}
     	
     	return paramsBatch;
     }
 
-    public static Attacks.SQLAttack createSQLAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams){
-    	
-    	List<NameValuePair> base_case = new ArrayList<NameValuePair>();
-    	List<NameValuePair> paramsSQL = new ArrayList<NameValuePair>();
-    	List<List<NameValuePair>> paramsBatchSQL = new ArrayList<>();
+    private static List<Attacks.SQLAttack> createSQLAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> additionalAttackParams, int batchSize){
+    	List<NameValuePair> base_case = new ArrayList<>();
+    	List<List<NameValuePair>> paramsListSQL;
     	
     	//prepare the base case
-    	for(int i=0; i<paramNames.size(); i++) {
-    		base_case.add(new BasicNameValuePair(paramNames.get(i), ""));
-    	}
-    	base_case.add(new BasicNameValuePair(button, ""));
+        for(String paramName : paramNames) {
+            base_case.add(new BasicNameValuePair(paramName, ""));
+        }
+
+        if(button!=null)
+    	    base_case.add(new BasicNameValuePair(button, ""));
     	
     	// implement the attacks for all the known vulnerable expressions
-    	paramsBatchSQL = getPairsFromExpressions(paramNames, button, Attacks.SQLAttack.knownExpressions);
+    	paramsListSQL = getPairsFromExpressions(paramNames, button, Attacks.SQLAttack.knownExpressions);
     	
-    	//add the user defined attackParams
-    	if(attackParams != null)
-    		paramsBatchSQL.addAll(attackParams);
-        
-        Attacks.SQLAttack sqlAttack = new Attacks.SQLAttack(url,paramsBatchSQL, base_case); 
-    	return sqlAttack;
+    	//add the user defined additionalAttackParams
+    	if(additionalAttackParams != null)
+    		paramsListSQL.addAll(additionalAttackParams);
+
+        List<Attacks.SQLAttack> attacks = new ArrayList<>();
+        List<List<NameValuePair>> batch;
+        for(int i=0; i < paramsListSQL.size(); i+=batchSize){
+            batch = new ArrayList<>(paramsListSQL.subList(i, i+batchSize > paramsListSQL.size() ? paramsListSQL.size() : i+batchSize));
+            attacks.add(new Attacks.SQLAttack(url, batch, base_case));
+        }
+        return attacks;
     }
     
-    public static Attacks.XSSAttack createXSSAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams){
-    	List<List<NameValuePair>> paramsBatchXSS = new ArrayList<>();
+    private static List<Attacks.XSSAttack> createXSSAttackObject(String url, List<String> paramNames, String button, List<List<NameValuePair>> additionalAttackParams, int batchSize){
+        List<List<NameValuePair>> paramsListXSS;
     	
     	// implement the attacks for all the known vulnerable expressions
-    	paramsBatchXSS = getPairsFromExpressions(paramNames, button, Attacks.XSSAttack.knownExpressions);
+    	paramsListXSS = getPairsFromExpressions(paramNames, button, Attacks.XSSAttack.knownExpressions);
     	
-    	//add the user defined attackParams
-    	if(attackParams != null)
-    		paramsBatchXSS.addAll(attackParams);
-        
-    	Attacks.XSSAttack xssAttack = new Attacks.XSSAttack(url, paramsBatchXSS);
-    	return xssAttack;
+    	//add the user defined additionalAttackParams
+    	if(additionalAttackParams != null)
+    		paramsListXSS.addAll(additionalAttackParams);
+
+        List<Attacks.XSSAttack> attacks = new ArrayList<>();
+        List<List<NameValuePair>> batch;
+
+        for(int i=0; i < paramsListXSS.size(); i+=batchSize){
+            batch = new ArrayList<>(paramsListXSS.subList(i, i+batchSize > paramsListXSS.size() ? paramsListXSS.size() : i+batchSize));
+            attacks.add(new Attacks.XSSAttack(url, batch));
+        }
+        return attacks;
     }
 
-    public static Attacks.BruteforceAttack createBruteforceAttackObject(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier){
+    private static List<Attacks.BruteforceAttack> createBruteforceAttackObject(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier, int batchSize){
         List<List<NameValuePair>> paramsPossibleValues = generatePermutationsFromRegexes(paramsRegex);
         List<NameValuePair> buttonInList = new ArrayList<>();
 
         buttonInList.add(new BasicNameValuePair(button, ""));
         paramsPossibleValues.add(buttonInList);
 
-        List<List<NameValuePair>> result = new ArrayList<>();
-        getCartesianProduct(paramsPossibleValues, 0, result, new ArrayList<>());
-        Attacks.BruteforceAttack bruteforceAttack = new Attacks.BruteforceAttack(url, result, successIdentifier);
-        return bruteforceAttack;
+        List<List<NameValuePair>> paramsList = new ArrayList<>();
+        getCartesianProduct(paramsPossibleValues, 0, paramsList, new ArrayList<>());
+
+        List<Attacks.BruteforceAttack> attacks = new ArrayList<>();
+
+        List<List<NameValuePair>> batch;
+        for(int i=0; i < paramsList.size(); i+=batchSize){
+            batch = new ArrayList<>(paramsList.subList(i, i+batchSize > paramsList.size() ? paramsList.size() : i+batchSize)); //sublist not serialisable, construct new list
+            attacks.add(new Attacks.BruteforceAttack(url, batch, successIdentifier));
+        }
+        return attacks;
     }
     
 
 	@Override
-	public void BruteforceAttack(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier, ClientCallback callback)
+	public void BruteforceAttack(String url, List<NameValuePair> paramsRegex, String button, String successIdentifier, ClientCallback callback, Integer batchSize)
 			throws RemoteException {
-		Attacks.BasicWebAttack attack = createBruteforceAttackObject(url, paramsRegex, button, successIdentifier);
-		queue.createTask(attack, callback);
+        batchSize = batchSize == null || batchSize <= 0 ? DEFAULT_BATCH_SIZE : batchSize;
+        List<Attacks.BruteforceAttack> attacks = createBruteforceAttackObject(url, paramsRegex, button, successIdentifier, batchSize);
+        System.out.println(attacks);
+        for(Attacks.BruteforceAttack a : attacks){
+            queue.createTask(a, callback);
+        }
 	}
 
 	@Override
-	public void XSSAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, ClientCallback callback)
+	public void XSSAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> additionalAttackParams, ClientCallback callback, Integer batchSize)
 			throws RemoteException {
-		Attacks.BasicWebAttack attack = createXSSAttackObject(url, paramNames, button, attackParams);
-        queue.createTask(attack, callback);
+        batchSize = batchSize == null || batchSize <= 0 ? DEFAULT_BATCH_SIZE : batchSize;
+        List<Attacks.XSSAttack> attacks = createXSSAttackObject(url, paramNames, button, additionalAttackParams, batchSize);
+        System.out.println(attacks);
+        for(Attacks.XSSAttack a : attacks){
+            queue.createTask(a, callback);
+        }
 	}
 
 	@Override
-	public void SQLAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> attackParams, ClientCallback callback)
+	public void SQLAttack(String url, List<String> paramNames, String button, List<List<NameValuePair>> additionalAttackParams, ClientCallback callback, Integer batchSize)
 			throws RemoteException {
-		Attacks.BasicWebAttack attack = createSQLAttackObject(url, paramNames, button, attackParams);
-        queue.createTask(attack, callback);
+        batchSize = batchSize == null || batchSize <= 0 ? DEFAULT_BATCH_SIZE : batchSize;
+        List<Attacks.SQLAttack> attacks = createSQLAttackObject(url, paramNames, button, additionalAttackParams, batchSize);
+        System.out.println(attacks);
+        for(Attacks.SQLAttack a : attacks){
+            queue.createTask(a, callback);
+        }
 	}
 }

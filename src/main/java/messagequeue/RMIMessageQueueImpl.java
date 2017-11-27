@@ -6,6 +6,7 @@ import util.Attacks;
 import util.Attacks.BasicWebAttack;
 import java.rmi.RemoteException;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -15,9 +16,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class RMIMessageQueueImpl extends java.rmi.server.UnicastRemoteObject implements RMIMessageQueue {
-	BlockingQueue<Attacks.BasicWebAttack> queue;
-	BlockingQueue<Attacks.BasicWebAttack> successfulAttacks;
-	ConcurrentHashMap<String, Set<client.ClientCallback>> url_subscribers;
+	private BlockingQueue<Attacks.BasicWebAttack> queue;
+	private BlockingQueue<Attacks.BasicWebAttack> successfulAttacks;
+	private ConcurrentHashMap<String, Set<client.ClientCallback>> url_subscribers;
 	
 	public RMIMessageQueueImpl()  throws RemoteException {
 		super();
@@ -58,8 +59,16 @@ public class RMIMessageQueueImpl extends java.rmi.server.UnicastRemoteObject imp
 		System.out.println(attack);
         System.out.println(attack.paramsBatch);
         Set<client.ClientCallback> clients = url_subscribers.get(attack.url);
-        for (client.ClientCallback c : clients) {
-        	c.update(attack);
+        
+        Iterator<client.ClientCallback> it = clients.iterator();
+        while(it.hasNext()) {
+        	client.ClientCallback c = it.next();
+        	try {
+        		c.update(attack);        		
+        	}
+        	catch(Exception ex) {
+        		it.remove();
+        	}
         }
 	}
 

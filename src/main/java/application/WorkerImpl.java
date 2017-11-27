@@ -10,18 +10,18 @@ import java.util.List;
 public class WorkerImpl extends java.rmi.server.UnicastRemoteObject implements Worker {
 
 	private String name;
-	private int count;
-	
 	protected WorkerImpl() throws RemoteException {
 		super();
 		this.name = "default";
-		count = 0;
+		
+		System.out.println("Started worker: ");
 	}
 	
 	protected WorkerImpl(String name) throws RemoteException {
 		super();
 		this.name = name;
-		count = 0;
+		
+		System.out.println("Started worker: ");
 	}
 
     @Override
