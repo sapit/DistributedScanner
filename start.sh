@@ -1,4 +1,21 @@
 #!/bin/bash
+
+display_help(){
+    echo "Available commands are:
+        --w|--worker\n
+        --q|--queue\n
+        --c|--client\n
+        --s|--server\n
+        Additional parameters:\n
+        --p|--port\n
+        --h|--host\n"
+}
+
+if [ "$1" == "-h" ] || [ $# -eq 0 ]; then
+    display_help
+    exit 0
+fi
+
 while [[ $# -gt 0 ]] && [[ ."$1" = .--* ]] ;
 do
     opt="$1";
@@ -16,9 +33,11 @@ do
         "--p"|"--port" )
             port="$1"; shift;;
         "--h"|"--host" )
-            host="$1"; shift;;
-        *) echo >&2 "Invalid option: $@"; exit 1;;
+            host="$1"; shift;&
+        *)
+            echo >&2 "Invalid option: $@"; display_help; exit 1;;
     esac
+    echo 'hui'
 done
 
 command="java -jar"
