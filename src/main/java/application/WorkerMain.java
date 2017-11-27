@@ -11,9 +11,9 @@ import org.apache.http.NameValuePair;
 
 
 public class WorkerMain {
-	static String reg_host = "localhost";
-	static int reg_port = 1099;
-	static RMIMessageQueue queue;
+	private static String reg_host = "localhost";
+	private static int reg_port = 1099;
+	private static RMIMessageQueue queue;
 
 	public static void main(String[] args) {
 		String port = System.getProperty("port");

@@ -16,8 +16,8 @@ import java.util.List;
 
 public class ProducerImpl extends java.rmi.server.UnicastRemoteObject implements Producer {
 	private RMIMessageQueue queue;
-	static String reg_host = "localhost";
-	static int reg_port = 1099;
+	private static String reg_host = "localhost";
+	private static int reg_port = 1099;
 	private final static int DEFAULT_BATCH_SIZE = 10;
 	
 	protected ProducerImpl() throws RemoteException {
