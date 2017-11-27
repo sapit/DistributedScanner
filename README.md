@@ -9,10 +9,14 @@ This is setup using Java 8 and Maven as a build tool
 ### IntelliJ
 Open the project by clicking on the `pom.xml` and 'Open as project'.
 
-### Maven
-The following command should take care of the dependencies
+### Maven Compilation
+The following command should take care of dependencies and compilation
 ```
-mvn clean package
+mvn clean install
 ```
 
-At the current stage of the project just compile and run the UrlAttacker class, which has a `main` method
+### Roles
+The project allows you to assume 4 roles in the form of jars, generated from maven - application, queue, server, client. If you run the 'start.sh' script with no parameters, you will see what parameters you can use.
+* __Queue__ is independent
+* The __Server__ and and the __Worker__ depend on a running __Queue__
+* The __Client__ depends on a running __Server__
