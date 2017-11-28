@@ -29,7 +29,7 @@ do
         "-p"|"--port" )
             port="$1"; shift;;
         "-h"|"--host" )
-            host="$1"; shift;&
+            host="$1"; shift;;
         *)
             echo >&2 "Invalid option: $opt"; display_help; exit 1;;
     esac
@@ -38,5 +38,4 @@ done
 command="java -jar"
 [ -z "$port" ] ||  command="$command -Dport=$port"      #if port is set, add as env var
 [ -z "$host" ] ||  command="$command -Dhost=$host"      #if host is set, add as env var
-
 eval "$command $target"
