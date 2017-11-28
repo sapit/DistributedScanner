@@ -12,6 +12,10 @@ display_help(){
     exit 0
 }
 
+if [ $# -eq 0 ]; then
+	display_help
+fi
+
 while [[ $# -gt 0 ]];
 do
     opt="$1";
